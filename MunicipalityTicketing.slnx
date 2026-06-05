@@ -1,0 +1,9 @@
+<Solution>
+  <Project Path="ApiGateway.Yarp/ApiGateway.Yarp.csproj" />
+  <Project Path="Journey.EventProcessor.Worker/Journey.EventProcessor.Worker.csproj" />
+  <Project Path="Journey.Telemetry.Api/Journey.Telemetry.Api.csproj" />
+  <Project Path="SharedKernel.Domain/SharedKernel.Domain.csproj" />
+  <Project Path="SharedKernel.Infrastructure/SharedKernel.Infrastructure.csproj" />
+  <Project Path="Tenant.Identity.Api/Tenant.Identity.Api.csproj" />
+  <Project Path="Ticketing.Wallet.Api/Ticketing.Wallet.Api.csproj" />
+</Solution>
