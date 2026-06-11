@@ -1,4 +1,4 @@
-namespace SharedKernel.Domain.Common;
+namespace core.SharedKernel.Domain.Common;
 
 public abstract class ValueObject
 {

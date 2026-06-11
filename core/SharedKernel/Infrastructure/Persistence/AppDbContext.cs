@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using SharedKernel.Domain.Entities;
+using core.SharedKernel.Domain.Entities;
 
-namespace SharedKernel.Infrastructure.Persistence;
+namespace core.SharedKernel.Infrastructure.Persistence;
 
 public abstract class AppDbContext : DbContext
 {
