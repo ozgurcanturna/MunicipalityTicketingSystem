@@ -1,6 +1,6 @@
 <Solution>
-  <Project Path="core/SharedKernel.Domain/SharedKernel.Domain.csproj" />
-  <Project Path="core/SharedKernel.Infrastructure/SharedKernel.Infrastructure.csproj" />
+  <Project Path="core/SharedKernel.Domain.csproj" />
+  <Project Path="core/SharedKernel.Infrastructure.csproj" />
   <Project Path="gateway/ApiGateway.Yarp.csproj" />
   <Project Path="workers/event-processor/Journey.EventProcessor.Worker.csproj" />
   <Project Path="services/telemetry/Journey.Telemetry.Api.csproj" />
