@@ -1,2 +1,41 @@
-# Documentation and source files only - no build artifacts, dependencies, or temp files detected
-# No .gitignore rules needed for this project state
+```
+# Build artifacts and binaries
+*.slnx
+*.csproj
+bin/
+obj/
+out/
+dist/
+build/
+target/
+
+# Dependencies
+packages/
+node_modules/
+vendor/
+
+# IDE files
+.vscode/
+.idea/
+*.userprefs
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Logs
+*.log
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+```
