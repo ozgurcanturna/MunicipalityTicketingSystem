@@ -91,8 +91,15 @@ graph TB
 ```
 MunicipalityTicketing/
 ├── core/                          # Shared Kernel
-│   ├── SharedKernel.Domain/       # Base classes, interfaces
-│   └── SharedKernel.Infrastructure/  # EF Core, Redis implementations
+│   └── SharedKernel/
+│       ├── Domain/                # Base classes, interfaces
+│       │   ├── Common/
+│       │   ├── Entities/
+│       │   ├── Events/
+│       │   └── Repositories/
+│       └── Infrastructure/        # EF Core, Redis implementations
+│           ├── Persistence/
+│           └── Repositories/
 ├── services/                      # Microservices
 │   ├── identity/                  # Tenant.Identity.Api - Kullanıcı yönetimi
 │   ├── wallet/                    # Ticketing.Wallet.Api - Cüzdan ve ödeme işlemleri

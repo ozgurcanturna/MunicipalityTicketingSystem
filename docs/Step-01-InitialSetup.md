@@ -73,8 +73,8 @@ mkdir -p tools/simulator
 ### Solution Dosyası
 - **Dosya**: `MunicipalityTicketing.slnx`
 - **Projeler**: 8 adet
-  - SharedKernel.Domain (core/)
-  - SharedKernel.Infrastructure (core/)
+  - SharedKernel.Domain (core/SharedKernel/Domain/)
+  - SharedKernel.Infrastructure (core/SharedKernel/Infrastructure/)
   - Tenant.Identity.Api (services/identity/)
   - Ticketing.Wallet.Api (services/wallet/)
   - Journey.Telemetry.Api (services/telemetry/)
@@ -89,23 +89,22 @@ mkdir -p tools/simulator
 ```
 MunicipalityTicketing/
 ├── core/
-│   ├── SharedKernel.Domain/
-│   │   ├── Entities/
-│   │   │   ├── Entity.cs
-│   │   │   └── AggregateRoot.cs
-│   │   ├── Common/
-│   │   │   └── ValueObject.cs
-│   │   ├── Events/
-│   │   │   └── DomainEvent.cs
-│   │   ├── Repositories/
-│   │   │   └── IRepository.cs
-│   │   └── SharedKernel.Domain.csproj
-│   └── SharedKernel.Infrastructure/
-│       ├── Persistence/
-│       │   └── AppDbContext.cs
-│       ├── Repositories/
-│       │   └── Repository.cs
-│       └── SharedKernel.Infrastructure.csproj
+│   └── SharedKernel/
+│       ├── Domain/
+│       │   ├── Common/
+│       │   │   └── ValueObject.cs
+│       │   ├── Entities/
+│       │   │   ├── Entity.cs
+│       │   │   └── AggregateRoot.cs
+│       │   ├── Events/
+│       │   │   └── DomainEvent.cs
+│       │   └── Repositories/
+│       │       └── IRepository.cs
+│       └── Infrastructure/
+│           ├── Persistence/
+│           │   └── AppDbContext.cs
+│           └── Repositories/
+│               └── Repository.cs
 ├── services/
 │   ├── identity/              ✅ Temiz
 │   ├── wallet/                ✅ Temiz
