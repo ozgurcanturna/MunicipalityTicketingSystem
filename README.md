@@ -137,6 +137,7 @@ MunicipalityTicketing/
 | [docs/Step-04-IdentityService.md](docs/Step-04-IdentityService.md) | Identity domain, persistence ve API adımları |
 | [docs/Step-05-WalletService.md](docs/Step-05-WalletService.md) | Wallet domain, persistence ve API adımları |
 | [docs/Step-06-TelemetryService.md](docs/Step-06-TelemetryService.md) | Telemetry domain, persistence ve API adımları |
+| [docs/Step-07-EventProcessor.md](docs/Step-07-EventProcessor.md) | Event consumer, retry ve dead-letter adımları |
 
 ---
 
@@ -184,7 +185,7 @@ Proje tamamlandığında simulation client'ları ile aşağıdaki senaryolar tes
 | 04 | Identity Service | ✅ Tamamlandı |
 | 05 | Wallet Service | ✅ Tamamlandı |
 | 06 | Telemetry Service | ✅ Tamamlandı |
-| 07 | Event Processor | 📝 Planlandı |
+| 07 | Event Processor | ✅ Tamamlandı |
 | 08 | API Gateway | 📝 Planlandı |
 | 09 | Testing | 📝 Planlandı |
 | 10 | Simulation Clients | 📝 Planlandı |
