@@ -5,6 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>SharedKernel.Domain</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="SharedKernel.Domain\**\*.cs" />
+  </ItemGroup>
 
 </Project>

@@ -5,6 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>SharedKernel.Infrastructure</RootNamespace>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
 
   <ItemGroup>
@@ -13,7 +14,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharedKernel.Domain\SharedKernel.Domain.csproj" />
+    <ProjectReference Include="SharedKernel.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="SharedKernel.Infrastructure\**\*.cs" />
   </ItemGroup>
 
 </Project>

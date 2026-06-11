@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'SharedKernel.Domain'">
+    <BaseIntermediateOutputPath>obj\SharedKernel.Domain\</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'SharedKernel.Infrastructure'">
+    <BaseIntermediateOutputPath>obj\SharedKernel.Infrastructure\</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+  </PropertyGroup>
+</Project>
