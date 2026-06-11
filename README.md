@@ -167,7 +167,7 @@ Proje tamamlandığında simulation client'ları ile aşağıdaki senaryolar tes
 |------|------|-------|
 | 00 | Planlama ve Gereksinimler | ✅ Tamamlandı |
 | 01 | Initial Setup - Template Temizliği | ✅ Tamamlandı |
-| 02 | Shared Kernel - Domain Base Classes | 📝 Planlandı |
+| 02 | Shared Kernel - Domain Base Classes | ✅ Tamamlandı |
 | 03 | Infrastructure - EF Core & Redis | 📝 Planlandı |
 | 04 | Identity Service | 📝 Planlandı |
 | 05 | Wallet Service | 📝 Planlandı |
