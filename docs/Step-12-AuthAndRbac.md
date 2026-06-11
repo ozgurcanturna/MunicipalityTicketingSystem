@@ -72,12 +72,12 @@ Alanlar:
 Dosyalar:
 
 - services/identity/Infrastructure/Authentication/IPasswordHasher.cs
-- services/identity/Infrastructure/Authentication/Sha256PasswordHasher.cs
+- services/identity/Infrastructure/Authentication/BCryptPasswordHasher.cs
 
 Not:
 
-- Bu adimda minimum calisirlik icin SHA256 tabanli hash kullanilir.
-- Production hardening asamasinda salt + work factor iceren daha guclu bir algoritmaya gecilmelidir.
+- Bu adimda BCrypt work factor 12 ile production-grade hashleme kullanilir.
+- Plain text password hicbir zaman kalici olarak saklanmaz.
 
 ### 2.3 JWT token service
 
@@ -147,6 +147,8 @@ Endpoint davranışı:
 
 Dosyalar:
 
+- gateway/Program.cs
+- gateway/appsettings.json
 - services/wallet/Program.cs
 - services/telemetry/Program.cs
 - services/wallet/appsettings.json
@@ -154,6 +156,7 @@ Dosyalar:
 
 Davranis:
 
+- Gateway, /api altindaki korumali isteklerde tokeni merkezi olarak da dogrular.
 - Bearer token zorunludur.
 - X-Tenant-Id header zorunludur.
 - Header ile token icindeki tenant_id claim eslesmezse 403 doner.
@@ -238,6 +241,13 @@ Content-Type: application/json
 }
 ```
 
+Gateway uzerinden ayni akis icin guncel ornekler:
+
+- gateway/ApiGateway.Yarp.http
+- services/identity/Tenant.Identity.Api.http
+- services/wallet/Ticketing.Wallet.Api.http
+- services/telemetry/Journey.Telemetry.Api.http
+
 ---
 
 ## 7) Tamamlanma Kontrol Listesi
@@ -246,6 +256,8 @@ Content-Type: application/json
 - [x] User rol bilgisi domain modeline eklendi.
 - [x] Wallet servisinde bearer auth + RBAC eklendi.
 - [x] Telemetry servisinde bearer auth + RBAC eklendi.
+- [x] Gateway katmaninda merkezi JWT dogrulamasi eklendi.
+- [x] Password hashing BCrypt ile guclendirildi.
 - [x] Ilk tenant ve admin olusturmak icin bootstrap akisi eklendi.
 - [x] Tenant claim ile tenant header eslestirme eklendi.
 - [x] Testler role/password degisikliklerine gore guncellendi.
@@ -258,10 +270,9 @@ Bu adim minimum calisir auth katmani sunar. Henuz tamamlanmayan production konul
 
 - Refresh token akisi
 - Password reset ve password policy
-- BCrypt/Argon2 gibi guclu password hashing
 - Key rotation ve secret management
-- Gateway seviyesinde merkezi auth enforcement
 - Identity endpointleri icin bootstrap admin stratejisi
+- Gateway seviyesinde rol bazli yetki kararlarinin merkezi politika motoruna tasinmasi
 
 ---
 

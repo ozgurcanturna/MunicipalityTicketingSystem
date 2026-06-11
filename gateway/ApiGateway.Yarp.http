@@ -1,6 +1,64 @@
 @ApiGateway.Yarp_HostAddress = http://localhost:5197
+@tenantName = ankara
+@tenantId = 00000000-0000-0000-0000-000000000000
+@adminEmail = admin@ankara.local
+@adminPassword = P@ssw0rd!
+@adminToken = paste-admin-token-here
+@operatorToken = paste-operator-token-here
+@walletId = 00000000-0000-0000-0000-000000000000
+@journeyId = 00000000-0000-0000-0000-000000000000
 
-GET {{ApiGateway.Yarp_HostAddress}}/weatherforecast/
+GET {{ApiGateway.Yarp_HostAddress}}/health
 Accept: application/json
 
-###
+### Bootstrap first tenant via gateway
+POST {{ApiGateway.Yarp_HostAddress}}/api/identity/auth/bootstrap
+Content-Type: application/json
+
+{
+	"tenantName": "{{tenantName}}",
+	"adminEmail": "{{adminEmail}}",
+	"adminFullName": "Ankara Admin",
+	"adminPassword": "{{adminPassword}}"
+}
+
+### Login via gateway
+POST {{ApiGateway.Yarp_HostAddress}}/api/identity/auth/login
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+
+{
+	"tenantId": "{{tenantId}}",
+	"email": "{{adminEmail}}",
+	"password": "{{adminPassword}}"
+}
+
+### Get current principal via gateway
+GET {{ApiGateway.Yarp_HostAddress}}/api/identity/auth/me
+Authorization: Bearer {{adminToken}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/json
+
+### Create wallet via gateway
+POST {{ApiGateway.Yarp_HostAddress}}/api/wallet/wallets
+Authorization: Bearer {{adminToken}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+
+{
+	"tenantId": "{{tenantId}}"
+}
+
+### Start telemetry journey via gateway
+POST {{ApiGateway.Yarp_HostAddress}}/api/telemetry/journeys/start
+Authorization: Bearer {{operatorToken}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+
+{
+	"tenantId": "{{tenantId}}",
+	"vehicleId": "BUS-001",
+	"routeCode": "R-10",
+	"latitude": 39.9255,
+	"longitude": 32.8663
+}

@@ -1,6 +1,56 @@
 @Journey.Telemetry.Api_HostAddress = http://localhost:5169
+@tenantId = 00000000-0000-0000-0000-000000000000
+@accessToken = paste-admin-or-operator-token-here
+@journeyId = 00000000-0000-0000-0000-000000000000
+@vehicleId = BUS-001
 
-GET {{Journey.Telemetry.Api_HostAddress}}/weatherforecast/
+GET {{Journey.Telemetry.Api_HostAddress}}/
 Accept: application/json
 
-###
+### Start journey (ADMIN or OPERATOR)
+POST {{Journey.Telemetry.Api_HostAddress}}/journeys/start
+Authorization: Bearer {{accessToken}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+
+{
+	"tenantId": "{{tenantId}}",
+	"vehicleId": "{{vehicleId}}",
+	"routeCode": "R-10",
+	"latitude": 39.9255,
+	"longitude": 32.8663
+}
+
+### Update location
+POST {{Journey.Telemetry.Api_HostAddress}}/journeys/{{journeyId}}/locations
+Authorization: Bearer {{accessToken}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+
+{
+	"latitude": 39.9260,
+	"longitude": 32.8670,
+	"source": "GPS"
+}
+
+### Check in passenger
+POST {{Journey.Telemetry.Api_HostAddress}}/journeys/{{journeyId}}/checkin
+Authorization: Bearer {{accessToken}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+
+{
+	"cardId": "CARD-1001",
+	"stopCode": "STOP-A"
+}
+
+### Get active journey (ADMIN, OPERATOR, USER)
+GET {{Journey.Telemetry.Api_HostAddress}}/journeys/active/{{vehicleId}}
+Authorization: Bearer {{accessToken}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/json
+
+### Complete journey
+POST {{Journey.Telemetry.Api_HostAddress}}/journeys/{{journeyId}}/complete
+Authorization: Bearer {{accessToken}}
+X-Tenant-Id: {{tenantId}}

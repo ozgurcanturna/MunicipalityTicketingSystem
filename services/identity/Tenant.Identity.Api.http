@@ -1,6 +1,58 @@
 @Tenant.Identity.Api_HostAddress = http://localhost:5115
+@bootstrapTenantName = ankara
+@bootstrapAdminEmail = admin@ankara.local
+@bootstrapAdminFullName = Ankara Admin
+@bootstrapAdminPassword = P@ssw0rd!
+@tenantId = 00000000-0000-0000-0000-000000000000
+@adminToken = paste-admin-token-here
+@operatorEmail = operator@ankara.local
 
-GET {{Tenant.Identity.Api_HostAddress}}/weatherforecast/
+GET {{Tenant.Identity.Api_HostAddress}}/
 Accept: application/json
 
-###
+### Bootstrap first tenant and admin
+POST {{Tenant.Identity.Api_HostAddress}}/auth/bootstrap
+Content-Type: application/json
+
+{
+	"tenantName": "{{bootstrapTenantName}}",
+	"adminEmail": "{{bootstrapAdminEmail}}",
+	"adminFullName": "{{bootstrapAdminFullName}}",
+	"adminPassword": "{{bootstrapAdminPassword}}"
+}
+
+### Login as admin after bootstrap
+POST {{Tenant.Identity.Api_HostAddress}}/auth/login
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+
+{
+	"tenantId": "{{tenantId}}",
+	"email": "{{bootstrapAdminEmail}}",
+	"password": "{{bootstrapAdminPassword}}"
+}
+
+### Inspect current principal
+GET {{Tenant.Identity.Api_HostAddress}}/auth/me
+Authorization: Bearer {{adminToken}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/json
+
+### Create operator user
+POST {{Tenant.Identity.Api_HostAddress}}/tenants/{{tenantId}}/users
+Authorization: Bearer {{adminToken}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+
+{
+	"email": "{{operatorEmail}}",
+	"fullName": "Ankara Operator",
+	"password": "P@ssw0rd!",
+	"role": "OPERATOR"
+}
+
+### Read tenant details
+GET {{Tenant.Identity.Api_HostAddress}}/tenants/{{tenantId}}
+Authorization: Bearer {{adminToken}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/json

@@ -49,7 +49,7 @@ builder.Services.AddAuthorization(options =>
 builder.Services.AddScoped<ITenantProvider, HttpHeaderTenantProvider>();
 builder.Services.AddSharedInfrastructure<IdentityDbContext>(builder.Configuration);
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
-builder.Services.AddSingleton<IPasswordHasher, Sha256PasswordHasher>();
+builder.Services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
 
 var app = builder.Build();

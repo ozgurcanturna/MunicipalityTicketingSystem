@@ -94,7 +94,8 @@ Bu repo Step 01-11 icin teknik bir MVP akisi sunar. Ancak Step dokumanlarinda ta
 
 - Shared Kernel + EF Core + Redis tabanli altyapi
 - Identity/Wallet/Telemetry minimal endpointleri ve temel domain kurallari
-- Identity bootstrap + JWT login + rol bazli endpoint korumalari
+- Identity bootstrap + JWT login + BCrypt password hashing + rol bazli endpoint korumalari
+- Gateway katmaninda merkezi JWT dogrulamasi ve tenant-claim kontrolu
 - Event processor (in-memory queue, retry, dead-letter, idempotency)
 - YARP gateway routing + tenant header zorunlulugu + basic rate limit
 - Unit ve integration testlerin temel kapsami

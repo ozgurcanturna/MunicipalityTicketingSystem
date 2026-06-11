@@ -1,6 +1,51 @@
 @Ticketing.Wallet.Api_HostAddress = http://localhost:5136
+@tenantId = 00000000-0000-0000-0000-000000000000
+@accessToken = paste-admin-or-user-token-here
+@walletId = 00000000-0000-0000-0000-000000000000
 
-GET {{Ticketing.Wallet.Api_HostAddress}}/weatherforecast/
+GET {{Ticketing.Wallet.Api_HostAddress}}/
 Accept: application/json
 
-###
+### Create wallet (ADMIN)
+POST {{Ticketing.Wallet.Api_HostAddress}}/wallets
+Authorization: Bearer {{accessToken}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+
+{
+	"tenantId": "{{tenantId}}"
+}
+
+### Get wallet (ADMIN or USER)
+GET {{Ticketing.Wallet.Api_HostAddress}}/wallets/{{walletId}}
+Authorization: Bearer {{accessToken}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/json
+
+### Top up wallet (ADMIN)
+POST {{Ticketing.Wallet.Api_HostAddress}}/wallets/{{walletId}}/topups
+Authorization: Bearer {{accessToken}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+
+{
+	"amount": 100.00,
+	"reference": "TOPUP-001"
+}
+
+### Spend from wallet (ADMIN or USER)
+POST {{Ticketing.Wallet.Api_HostAddress}}/wallets/{{walletId}}/spend
+Authorization: Bearer {{accessToken}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+
+{
+	"amount": 12.50,
+	"reference": "TICKET-001"
+}
+
+### List wallet transactions
+GET {{Ticketing.Wallet.Api_HostAddress}}/wallets/{{walletId}}/transactions
+Authorization: Bearer {{accessToken}}
+X-Tenant-Id: {{tenantId}}
+Accept: application/json

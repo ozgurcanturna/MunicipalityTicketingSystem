@@ -6,6 +6,7 @@ Bu adımda API Gateway, Identity/Wallet/Telemetry servislerine merkezi giriş no
 Bu adım sonunda:
 - Gateway route ve cluster yapılandırması hazır olur.
 - Tenant header zorunluluğu uygulanır.
+- JWT bearer token gateway katmanında da doğrulanır.
 - Correlation-id propagation yapılır.
 - Basit tenant/IP tabanlı rate limiting devreye alınır.
 
@@ -33,11 +34,13 @@ Dosya: gateway/Program.cs
 
 Eklenen adımlar:
 1. AddReverseProxy + LoadFromConfig
-2. Global rate limiter
-3. Correlation-id middleware
-4. X-Tenant-Id zorunluluğu middleware (api path'lerinde)
-5. Health endpoint
-6. MapReverseProxy
+2. Gateway-level JWT bearer authentication
+3. Global rate limiter
+4. Correlation-id middleware
+5. X-Tenant-Id zorunluluğu middleware (api path'lerinde)
+6. Token tenant claim ile header eşleştirmesi
+7. Health endpoint
+8. MapReverseProxy
 
 ### 2.1 Correlation-id davranışı
 - İstekte X-Correlation-Id yoksa gateway üretir.
@@ -46,8 +49,14 @@ Eklenen adımlar:
 ### 2.2 Tenant header davranışı
 - /api ile başlayan tüm isteklerde X-Tenant-Id zorunludur.
 - Header yoksa 400 BadRequest döner.
+- /api/identity/auth/bootstrap istisna olarak tenant header olmadan çağrılabilir.
 
-### 2.3 Rate limit davranışı
+### 2.3 Gateway JWT davranışı
+- /api/identity/auth/bootstrap ve /api/identity/auth/login dışındaki /api isteklerinde bearer token zorunludur.
+- Token gateway üzerinde doğrulanır; geçersiz veya eksik token 401 döner.
+- Token içindeki tenant_id claim ile X-Tenant-Id eşleşmezse 403 döner.
+
+### 2.4 Rate limit davranışı
 - Tenant header varsa tenant bazlı partition
 - Header yoksa IP bazlı partition
 - 60 istek / 60 saniye limit
