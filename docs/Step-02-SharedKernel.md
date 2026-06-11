@@ -10,10 +10,10 @@ Bu adımda, Domain-Driven Design (DDD) prensiplerine uygun olarak tüm mikroserv
 ## Adım 1: Proje Yapısını Oluşturma
 
 ### 1.1. Dizin Yapısı
-Aşağıdaki dizin yapısını `src/BuildingBlocks/SharedKernel/` altında oluşturun:
+Aşağıdaki dizin yapısını `core/` altında oluşturun:
 
 ```
-src/BuildingBlocks/SharedKernel/
+core/
 ├── SharedKernel.Domain/
 │   ├── Common/
 │   │   └── ValueObject.cs
@@ -37,8 +37,8 @@ src/BuildingBlocks/SharedKernel/
 
 ```bash
 # Shared Kernel dizinlerini oluştur
-mkdir -p src/BuildingBlocks/SharedKernel/SharedKernel.Domain/{Entities,Events,Common,Repositories}
-mkdir -p src/BuildingBlocks/SharedKernel/SharedKernel.Infrastructure/{Persistence,Repositories}
+mkdir -p core/SharedKernel.Domain/{Entities,Events,Common,Repositories}
+mkdir -p core/SharedKernel.Infrastructure/{Persistence,Repositories}
 ```
 
 ## Adım 2: SharedKernel.Domain Projesi
@@ -366,8 +366,8 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : Aggregat
 Mevcut `MunicipalityTicketing.slnx` çözüm dosyasına yeni projeleri ekleyin:
 
 ```bash
-dotnet sln MunicipalityTicketing.slnx add src/BuildingBlocks/SharedKernel/SharedKernel.Domain/SharedKernel.Domain.csproj
-dotnet sln MunicipalityTicketing.slnx add src/BuildingBlocks/SharedKernel/SharedKernel.Infrastructure/SharedKernel.Infrastructure.csproj
+dotnet sln MunicipalityTicketing.slnx add core/SharedKernel.Domain/SharedKernel.Domain.csproj
+dotnet sln MunicipalityTicketing.slnx add core/SharedKernel.Infrastructure/SharedKernel.Infrastructure.csproj
 ```
 
 ## Adım 5: Build Testi
@@ -375,8 +375,8 @@ dotnet sln MunicipalityTicketing.slnx add src/BuildingBlocks/SharedKernel/Shared
 Projelerin doğru şekilde oluşturulduğunu test edin:
 
 ```bash
-dotnet build src/BuildingBlocks/SharedKernel/SharedKernel.Domain/SharedKernel.Domain.csproj
-dotnet build src/BuildingBlocks/SharedKernel/SharedKernel.Infrastructure/SharedKernel.Infrastructure.csproj
+dotnet build core/SharedKernel.Domain/SharedKernel.Domain.csproj
+dotnet build core/SharedKernel.Infrastructure/SharedKernel.Infrastructure.csproj
 ```
 
 ## Özet

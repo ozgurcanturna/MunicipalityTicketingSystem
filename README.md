@@ -90,14 +90,19 @@ graph TB
 
 ```
 MunicipalityTicketing/
-├── src/
-│   ├── SharedKernel/              # Domain, Infrastructure, Application
-│   ├── Tenants.Identity.Api       # Kullanıcı yönetimi
-│   ├── Ticketing.Wallet.Api       # Cüzdan ve ödeme işlemleri
-│   ├── Journey.Telemetry.Api      # Yolculuk takibi
-│   ├── Journey.EventProcessor.Worker  # Asenkron event processing
-│   ├── ApiGateway.Yarp            # API Gateway
-│   └── Clients/Simulation         # Load testing clients
+├── core/                          # Shared Kernel
+│   ├── SharedKernel.Domain/       # Base classes, interfaces
+│   └── SharedKernel.Infrastructure/  # EF Core, Redis implementations
+├── services/                      # Microservices
+│   ├── identity/                  # Tenant.Identity.Api - Kullanıcı yönetimi
+│   ├── wallet/                    # Ticketing.Wallet.Api - Cüzdan ve ödeme işlemleri
+│   └── telemetry/                 # Journey.Telemetry.Api - Yolculuk takibi
+├── workers/                       # Background Workers
+│   └── event-processor/           # Journey.EventProcessor.Worker - Asenkron event processing
+├── gateway/                       # API Gateway
+│   └── ApiGateway.Yarp/           # YARP reverse proxy
+├── tools/                         # Development Tools
+│   └── simulator/                 # Load testing clients
 ├── tests/
 │   ├── MunicipalityTicketing.UnitTests
 │   └── MunicipalityTicketing.IntegrationTests
@@ -107,6 +112,7 @@ MunicipalityTicketing/
 │   ├── Step-01-InitialSetup.md    # Initial setup steps
 │   └── Step-XX-*.md               # Diğer adımlar
 ├── docker-compose.yml
+├── MunicipalityTicketing.slnx
 └── README.md
 ```
 

@@ -1,9 +1,10 @@
 <Solution>
-  <Project Path="src/BuildingBlocks/SharedKernel/SharedKernel.Domain/SharedKernel.Domain.csproj" />
-  <Project Path="src/BuildingBlocks/SharedKernel/SharedKernel.Infrastructure/SharedKernel.Infrastructure.csproj" />
-  <Project Path="ApiGateway.Yarp/ApiGateway.Yarp.csproj" />
-  <Project Path="Journey.EventProcessor.Worker/Journey.EventProcessor.Worker.csproj" />
-  <Project Path="Journey.Telemetry.Api/Journey.Telemetry.Api.csproj" />
-  <Project Path="Tenant.Identity.Api/Tenant.Identity.Api.csproj" />
-  <Project Path="Ticketing.Wallet.Api/Ticketing.Wallet.Api.csproj" />
+  <Project Path="core/SharedKernel.Domain/SharedKernel.Domain.csproj" />
+  <Project Path="core/SharedKernel.Infrastructure/SharedKernel.Infrastructure.csproj" />
+  <Project Path="gateway/ApiGateway.Yarp.csproj" />
+  <Project Path="workers/event-processor/Journey.EventProcessor.Worker.csproj" />
+  <Project Path="services/telemetry/Journey.Telemetry.Api.csproj" />
+  <Project Path="services/identity/Tenant.Identity.Api.csproj" />
+  <Project Path="services/wallet/Ticketing.Wallet.Api.csproj" />
+  <Project Path="tools/simulator/MunicipalityTicketing.Simulator.csproj" />
 </Solution>
