@@ -14,37 +14,36 @@ Aşağıdaki dizin yapısını `core/` altında oluşturun:
 
 ```
 core/
-├── SharedKernel.Domain/
-│   ├── Common/
-│   │   └── ValueObject.cs
-│   ├── Entities/
-│   │   ├── Entity.cs
-│   │   └── AggregateRoot.cs
-│   ├── Events/
-│   │   └── DomainEvent.cs
-│   ├── Repositories/
-│   │   └── IRepository.cs
-│   └── SharedKernel.Domain.csproj
-└── SharedKernel.Infrastructure/
-    ├── Persistence/
-    │   └── AppDbContext.cs
-    ├── Repositories/
-    │   └── Repository.cs
-    └── SharedKernel.Infrastructure.csproj
+└── SharedKernel/
+    ├── Domain/
+    │   ├── Common/
+    │   │   └── ValueObject.cs
+    │   ├── Entities/
+    │   │   ├── Entity.cs
+    │   │   └── AggregateRoot.cs
+    │   ├── Events/
+    │   │   └── DomainEvent.cs
+    │   └── Repositories/
+    │       └── IRepository.cs
+    └── Infrastructure/
+        ├── Persistence/
+        │   └── AppDbContext.cs
+        └── Repositories/
+            └── Repository.cs
 ```
 
 ### 1.2. Komutlarla Oluşturma
 
 ```bash
 # Shared Kernel dizinlerini oluştur
-mkdir -p core/SharedKernel.Domain/{Entities,Events,Common,Repositories}
-mkdir -p core/SharedKernel.Infrastructure/{Persistence,Repositories}
+mkdir -p core/SharedKernel/Domain/{Entities,Events,Common,Repositories}
+mkdir -p core/SharedKernel/Infrastructure/{Persistence,Repositories}
 ```
 
 ## Adım 2: SharedKernel.Domain Projesi
 
 ### 2.1. Proje Dosyası
-`src/BuildingBlocks/SharedKernel/SharedKernel.Domain/SharedKernel.Domain.csproj`:
+`core/SharedKernel/Domain/SharedKernel.Domain.csproj`:
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -253,7 +252,7 @@ public interface IRepository
 ## Adım 3: SharedKernel.Infrastructure Projesi
 
 ### 3.1. Proje Dosyası
-**Dosya:** `SharedKernel.Infrastructure/SharedKernel.Infrastructure.csproj`
+**Dosya:** `core/SharedKernel/Infrastructure/SharedKernel.Infrastructure.csproj`
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
@@ -270,7 +269,7 @@ public interface IRepository
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SharedKernel.Domain\SharedKernel.Domain.csproj" />
+    <ProjectReference Include="..\Domain\SharedKernel.Domain.csproj" />
   </ItemGroup>
 </Project>
 ```
@@ -366,8 +365,8 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : Aggregat
 Mevcut `MunicipalityTicketing.slnx` çözüm dosyasına yeni projeleri ekleyin:
 
 ```bash
-dotnet sln MunicipalityTicketing.slnx add core/SharedKernel.Domain/SharedKernel.Domain.csproj
-dotnet sln MunicipalityTicketing.slnx add core/SharedKernel.Infrastructure/SharedKernel.Infrastructure.csproj
+dotnet sln MunicipalityTicketing.slnx add core/SharedKernel/Domain/SharedKernel.Domain.csproj
+dotnet sln MunicipalityTicketing.slnx add core/SharedKernel/Infrastructure/SharedKernel.Infrastructure.csproj
 ```
 
 ## Adım 5: Build Testi
@@ -375,8 +374,8 @@ dotnet sln MunicipalityTicketing.slnx add core/SharedKernel.Infrastructure/Share
 Projelerin doğru şekilde oluşturulduğunu test edin:
 
 ```bash
-dotnet build core/SharedKernel.Domain/SharedKernel.Domain.csproj
-dotnet build core/SharedKernel.Infrastructure/SharedKernel.Infrastructure.csproj
+dotnet build core/SharedKernel/Domain/SharedKernel.Domain.csproj
+dotnet build core/SharedKernel/Infrastructure/SharedKernel.Infrastructure.csproj
 ```
 
 ## Özet
