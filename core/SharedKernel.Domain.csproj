@@ -7,4 +7,8 @@
     <RootNamespace>SharedKernel.Domain</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="SharedKernel.Infrastructure\**\*.cs" />
+  </ItemGroup>
+
 </Project>
