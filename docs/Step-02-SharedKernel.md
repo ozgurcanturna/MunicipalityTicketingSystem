@@ -381,13 +381,13 @@ dotnet build core/SharedKernel/Infrastructure/SharedKernel.Infrastructure.csproj
 ## Özet
 
 Bu adımda şunları oluşturduk:
-- ✅ **Entity**: Tüm domain entity'leri için temel sınıf
-- ✅ **AggregateRoot**: DDD aggregate root implementasyonu
-- ✅ **ValueObject**: Değer nesneleri için temel sınıf
-- ✅ **IDomainEvent & DomainEvent**: Domain event altyapısı
-- ✅ **IRepository**: Generic repository interface
-- ✅ **AppDbContext**: EF Core DbContext temel sınıfı
-- ✅ **Repository<T>**: Generic repository implementasyonu
+- ⬜ **Entity**: Tüm domain entity'leri için temel sınıf
+- ⬜ **AggregateRoot**: DDD aggregate root implementasyonu
+- ⬜ **ValueObject**: Değer nesneleri için temel sınıf
+- ⬜ **IDomainEvent & DomainEvent**: Domain event altyapısı
+- ⬜ **IRepository**: Generic repository interface
+- ⬜ **AppDbContext**: EF Core DbContext temel sınıfı
+- ⬜ **Repository<T>**: Generic repository implementasyonu
 
 ## Sonraki Adım
 

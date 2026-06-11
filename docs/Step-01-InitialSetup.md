@@ -5,7 +5,7 @@ Template projelerden gelen gereksiz kodları temizleyip, solution'ı build edile
 
 ---
 
-## ✅ Tamamlanan İşlemler
+## ⬜ Yapılacak İşlemler
 
 ### 1. Gereksiz Dosyaların Silinmesi
 ```bash
@@ -106,21 +106,21 @@ MunicipalityTicketing/
 │           └── Repositories/
 │               └── Repository.cs
 ├── services/
-│   ├── identity/              ✅ Temiz
-│   ├── wallet/                ✅ Temiz
-│   └── telemetry/             ✅ Temiz
+│   ├── identity/              ⬜ Yapılacak
+│   ├── wallet/                ⬜ Yapılacak
+│   └── telemetry/             ⬜ Yapılacak
 ├── workers/
-│   └── event-processor/       ✅ Temiz
+│   └── event-processor/       ⬜ Yapılacak
 ├── gateway/
-│   ├── ApiGateway.Yarp.csproj  ✅ Temiz
-│   └── Program.cs              ✅ Temiz
+│   ├── ApiGateway.Yarp.csproj  ⬜ Yapılacak
+│   └── Program.cs              ⬜ Yapılacak
 ├── tools/
 │   └── simulator/             📁 Yeni oluşturuldu
 ├── docs/
-│   ├── skills.md             ✅ Oluşturuldu
-│   ├── Step-00-Planlama.md   ✅ Oluşturuldu
-│   ├── Step-01-InitialSetup.md ✅ Bu dosya
-│   └── Step-02-SharedKernel.md ✅ Oluşturuldu
+│   ├── skills.md             ⬜ Yapılacak
+│   ├── Step-00-Planlama.md   ⬜ Yapılacak
+│   ├── Step-01-InitialSetup.md ⬜ Bu dosya
+│   └── Step-02-SharedKernel.md ⬜ Yapılacak
 └── README.md                 🔄 Güncellenecek
 ```
 
@@ -133,19 +133,19 @@ MunicipalityTicketing/
 2. **Git Commit**: İlk temiz durumu commit et
 3. **README.md Güncelleme**: Proje açıklamasını ekle
 
-### Step 02'de Yapılacaklar (TAMAMLANDI)
-✅ **SharedKernel.Domain**:
+### Step 02'de Yapılacaklar
+⬜ **SharedKernel.Domain**:
    - Entity abstract class (Id, CreatedAt, UpdatedAt, DomainEvents)
    - AggregateRoot base class (Version, RegisterCreated, RegisterDeleted)
    - ValueObject base class (equality components)
    - IRepository interface (CRUD operations)
    - IDomainEvent interface ve implementasyonları (EntityCreatedEvent, EntityDeletedEvent, EntityUpdatedEvent)
 
-✅ **SharedKernel.Infrastructure**:
+⬜ **SharedKernel.Infrastructure**:
    - AppDbContext base class (audit fields auto-update)
    - Repository<TEntity> base implementation
 
-✅ **Proje Referansları**:
+⬜ **Proje Referansları**:
    - SharedKernel.Infrastructure -> SharedKernel.Domain referansı eklendi
    - Solution dosyası güncellendi
 
@@ -158,10 +158,10 @@ MunicipalityTicketing/
 - Solution yapısı senaryoya uygun
 - Simulation dizini oluşturuldu
 - Dokümantasyon altyapısı hazır
-- **Step 02 tamamlandı**: Shared Kernel implementation hazır
+- **Step 02 yapılacak**: Shared Kernel implementation
 
 ---
 
-**Durum**: ✅ Tamamlandı  
-**Son Güncelleme**: 2024  
+**Durum**: ⬜ Yapılacak  
+**Son Güncelleme**: 11.06.2026  
 **Yazar**: Özgür Can TURNA

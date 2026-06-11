@@ -1,226 +1,236 @@
-# Municipality Ticketing System - Skills & Guidelines
+# AI Agent Skills & Project Rules
 
-## Proje Yazarı
-**Özgür Can TURNA**  
-*Proje Lideri ve Tek Geliştirici (Simülasyon)*
-
-Bu doküman, 15 kişilik hayali bir yazılım geliştirme ekibinin proje lideri olarak davranan AI agent'ın, belediye otobüs biletleme sistemi projesini DDD (Domain-Driven Design) prensiplerine uygun şekilde geliştirmesi için gerekli beceri ve yönergeleri içerir.
-
----
-
-## 🎯 Temel Prensipler
-
-### 1. Domain-Driven Design (DDD)
-- **Ubiquitous Language**: Her terim domain uzmanlarının diliyle tanımlanmalı
-- **Bounded Context**: Her mikroservis kendi sınırlı bağlamında bağımsız
-- **Aggregates**: Transaction sınırları aggregate root'lar tarafından belirlenmeli
-- **Value Objects**: Immutable, equals/hashcode tabanlı karşılaştırma
-- **Entities**: Identity-based nesneler, lifecycle yönetimi
-- **Repositories**: Interface-segregation, persistence-agnostic
-- **Domain Events**: Eventual consistency için event sourcing pattern
-
-### 2. Mikroservis Mimarisi
-- **Single Responsibility**: Her servis tek bir business capability
-- **Decentralized Data**: Her servisin kendi database'i
-- **API Gateway**: YARP ile routing, authentication, rate limiting
-- **Event-Driven**: Brighter/Darker ile async communication
-- **Circuit Breaker**: Polly ile resilience patterns
-
-### 3. Multi-Tenancy
-- **Database-per-Tenant**: Her belediye izole database
-- **Tenant Identification**: JWT claims veya header-based routing
-- **Schema Isolation**: Tenant-specific schema migration
-- **Resource Quotas**: Per-tenant rate limiting ve quota management
-
-### 4. Performance & Scalability
-- **Caching**: Redis distributed cache
-- **Connection Pooling**: EF Core connection pooling
-- **Async/Await**: Non-blocking I/O operations
-- **Load Balancing**: Kubernetes HPA veya Docker Swarm scaling
-- **Database Indexing**: Query performance optimization
-
-### 5. Security
-- **Authentication**: JWT with refresh tokens
-- **Authorization**: Policy-based RBAC
-- **Encryption**: TLS 1.3, AES-256 data at rest
-- **Audit Logging**: Tüm kritik işlemler loglanır
-- **Input Validation**: FluentValidation ile strong typing
-
-### 6. DevOps & CI/CD
-- **Containerization**: Docker multi-stage builds
-- **Orchestration**: Kubernetes manifests veya Docker Compose
-- **Zero-Downtime Deployment**: Blue-green veya rolling updates
-- **Health Checks**: Kubernetes liveness/readiness probes
-- **Monitoring**: OpenTelemetry + Prometheus + Grafana
+> **Project**: Municipality Bus Ticketing System  
+> **Author**: Özgür Can TURNA  
+> **Role**: Project Lead (simulating a 15-person dev team)  
+> **Runtime**: .NET 10 | C# 14  
 
 ---
 
-## 🛠️ Tool Set & Kütüphaneler
+## 1. Architecture Constraints
 
-| Kategori | Araç/Kütüphane | Lisans | Kullanım Amacı |
-|----------|----------------|--------|----------------|
-| **Framework** | .NET 10 | MIT | Backend development |
-| **Message Bus** | Brighter & Darker | Apache 2.0 | Event-driven architecture |
-| **ORM** | Entity Framework Core 10 | MIT | Data persistence |
-| **Cache** | StackExchange.Redis | MIT | Distributed caching |
-| **Validation** | FluentValidation | Apache 2.0 | Request validation |
-| **Mapping** | AutoMapper | MIT | DTO mapping |
-| **Logging** | Serilog | Apache 2.0 | Structured logging |
-| **Tracing** | OpenTelemetry | Apache 2.0 | Distributed tracing |
-| **API Gateway** | YARP | MIT | Reverse proxy & routing |
-| **Testing** | xUnit, Moq, Shouldly | Various | Unit & integration tests |
-| **Simulation** | Custom .NET Clients | MIT | Load testing & demo |
-| **Documentation** | Markdown, Mermaid | MIT | Architecture docs |
-| **Container** | Docker | Apache 2.0 | Containerization |
-| **Orchestration** | Docker Compose / K8s | Apache 2.0 | Service orchestration |
+| Rule | Detail |
+|------|--------|
+| Pattern | DDD (Domain-Driven Design) + CQRS |
+| Style | Microservices with event-driven communication |
+| Multi-Tenancy | Database-per-Tenant (full isolation) |
+| Messaging | Brighter (commands) & Darker (queries) |
+| API Gateway | YARP reverse proxy |
+| Caching | Redis (StackExchange.Redis) |
+| ORM | Entity Framework Core 10 |
+| Deployment | Docker Compose → Kubernetes |
 
 ---
 
-## 📝 Kodlama Standartları
+## 2. Project Structure
 
-### Naming Conventions
-```csharp
-// Entities
-public class Ticket : AggregateRoot<Guid> { }
-
-// Value Objects
-public record Money(decimal Amount, string Currency);
-
-// Repositories
-public interface ITicketRepository : IRepository<Ticket, Guid> { }
-
-// Services
-public interface ITicketPricingService { }
-public class TicketPricingService : ITicketPricingService { }
-
-// DTOs
-public record CreateTicketRequest(Guid RouteId, DateTime TravelDate);
-public record TicketResponse(Guid Id, string Status);
-
-// Events
-public record TicketPurchasedEvent(Guid TicketId, Guid UserId, decimal Amount);
-```
-
-### Project Structure
 ```
 MunicipalityTicketing/
-├── core/                      # Shared Kernel
-│   └── SharedKernel/
-│       ├── Domain/            # Base classes, interfaces
-│       │   ├── Common/
-│       │   ├── Entities/
-│       │   ├── Events/
-│       │   └── Repositories/
-│       └── Infrastructure/    # EF Core, Redis, etc.
-│           ├── Persistence/
-│           └── Repositories/
-├── services/                  # Microservices
-│   ├── identity/              # Tenant.Identity.Api
-│   ├── wallet/                # Ticketing.Wallet.Api
-│   └── telemetry/             # Journey.Telemetry.Api
-├── workers/                   # Background Workers
-│   └── event-processor/       # Journey.EventProcessor.Worker
-├── gateway/                   # API Gateway
-│   └── ApiGateway.Yarp/
-├── tools/                     # Development Tools
-│   └── simulator/             # Load testing clients
+├── core/SharedKernel/
+│   ├── Domain/           # Base classes: Entity, AggregateRoot, ValueObject
+│   │   ├── Common/       # ValueObject, Result pattern
+│   │   ├── Entities/     # Entity, AggregateRoot
+│   │   ├── Events/       # IDomainEvent, DomainEvent
+│   │   └── Repositories/ # IRepository<T>
+│   └── Infrastructure/   # EF Core, Redis implementations
+│       ├── Persistence/  # AppDbContext
+│       └── Repositories/ # Repository<T>
+├── services/
+│   ├── identity/         # Tenant.Identity.Api
+│   ├── wallet/           # Ticketing.Wallet.Api
+│   └── telemetry/        # Journey.Telemetry.Api
+├── workers/
+│   └── event-processor/  # Journey.EventProcessor.Worker
+├── gateway/              # ApiGateway.Yarp
+├── tools/simulator/      # Load testing & simulation clients
 ├── tests/
 │   ├── MunicipalityTicketing.UnitTests/
 │   └── MunicipalityTicketing.IntegrationTests/
-├── docs/
-│   ├── skills.md
-│   ├── Step-00-Planlama.md
-│   ├── Step-01-InitialSetup.md
-│   └── Step-XX-*.md
-└── README.md
+├── docs/                 # Step-XX docs, this file
+└── MunicipalityTicketing.slnx
 ```
 
-### Error Handling
+---
+
+## 3. Naming Conventions
+
 ```csharp
-// Use Result pattern for business logic
+// === Entities (inherit from AggregateRoot) ===
+public class Ticket : AggregateRoot { }
+
+// === Value Objects (inherit from ValueObject) ===
+public class Money : ValueObject { }
+
+// === Repository Interfaces ===
+public interface ITicketRepository : IRepository<Ticket> { }
+
+// === Domain Services ===
+public interface ITicketPricingService { }
+public class TicketPricingService : ITicketPricingService { }
+
+// === DTOs (use records) ===
+public record CreateTicketRequest(Guid RouteId, DateTime TravelDate);
+public record TicketResponse(Guid Id, string Status);
+
+// === Domain Events (use records) ===
+public record TicketPurchasedEvent(Guid TicketId, Guid UserId, decimal Amount);
+```
+
+### File & Namespace Rules
+- **Namespace** = folder path (e.g., `SharedKernel.Domain.Entities`)
+- **One class per file** — filename matches class name
+- **Nullable reference types**: always enabled
+- **Implicit usings**: always enabled
+
+---
+
+## 4. Coding Standards
+
+### Error Handling
+- Use **Result pattern** for business logic — never throw exceptions for expected failures
+- Use **global exception middleware** for unhandled errors
+- Return **Problem Details (RFC 7807)** from API endpoints
+
+```csharp
+// Result pattern
 public Result<Ticket> PurchaseTicket(CreateTicketRequest request)
 {
     if (!route.Exists())
         return Result.Failure<Ticket>("Route not found");
-    
-    // Business logic
     return Result.Success(ticket);
 }
-
-// Global exception handler middleware
-app.UseExceptionHandler("/error");
 ```
 
-### Testing Strategy
+### Async
+- All I/O operations **must** be async (`Task<T>`, `CancellationToken`)
+- Use `ConfigureAwait(false)` in library code
+- Never use `.Result` or `.Wait()` — no sync-over-async
+
+### Validation
+- Use **FluentValidation** for request validation
+- Validate at API boundary, not in domain layer
+- Domain enforces invariants via constructor/factory methods
+
+### Dependency Injection
+- Register services in `Program.cs` using extension methods
+- Use `IServiceCollection` extensions per feature area
+- Scoped lifetime for DbContext and repositories
+- Singleton for configuration and caching services
+
+---
+
+## 5. DDD Rules
+
+| Concept | Rule |
+|---------|------|
+| **Entity** | Has identity (`Guid Id`), mutable, tracked by EF Core |
+| **AggregateRoot** | Transaction boundary, owns child entities, has `Version` |
+| **ValueObject** | Immutable, equality by components, no identity |
+| **DomainEvent** | Raised inside aggregates, dispatched after `SaveChanges` |
+| **Repository** | One per aggregate root, interface in Domain, impl in Infrastructure |
+
+### Aggregate Design Rules
+1. Aggregates reference other aggregates **by ID only**
+2. One transaction = one aggregate modification
+3. Use domain events for cross-aggregate side effects
+4. Factory methods (`Create()`) for entity construction — no public constructors
+
+---
+
+## 6. Multi-Tenancy Rules
+
+- Every request **must** carry a `TenantId` (JWT claim or header)
+- Tenant resolution happens at middleware level before any business logic
+- Database connection string is resolved per tenant
+- **Never** share data across tenants — enforce at query level
+- Per-tenant rate limiting at API Gateway
+
+---
+
+## 7. Technology Stack
+
+| Category | Tool | Purpose |
+|----------|------|---------|
+| Framework | .NET 10 | Backend runtime |
+| Messaging | Brighter & Darker | CQRS, event-driven |
+| ORM | EF Core 10 | Data persistence |
+| Cache | StackExchange.Redis | Distributed caching |
+| Validation | FluentValidation | Request validation |
+| Logging | Serilog | Structured logging |
+| Tracing | OpenTelemetry | Distributed tracing |
+| Gateway | YARP | Reverse proxy & routing |
+| Testing | xUnit, Moq, Shouldly | Unit & integration tests |
+| Container | Docker & Docker Compose | Containerization |
+
+---
+
+## 8. Testing Strategy
+
+| Layer | Framework | Scope |
+|-------|-----------|-------|
+| Unit | xUnit + Moq + Shouldly | Domain logic, services |
+| Integration | xUnit + TestServer | API endpoints, DB queries |
+| Load | Custom simulator clients | 10M+ daily transactions |
+
 ```csharp
-// Unit Tests: Fast, isolated, mock dependencies
+// Unit test pattern: MethodName_Condition_ExpectedResult
 [Fact]
-public void PurchaseTicket_InsufficientBalance_ReturnsFailure()
+public void Deduct_InsufficientBalance_ReturnsFailure()
 {
-    // Arrange
     var wallet = new Wallet(userId, initialBalance: 10);
-    
-    // Act
     var result = wallet.Deduct(50);
-    
-    // Assert
     result.IsFailure.ShouldBeTrue();
 }
-
-// Integration Tests: Real dependencies, test boundaries
-[Fact]
-public async Task PurchaseTicket_EndToEnd_CreatesTicketAndDeductsBalance()
-{
-    // Use TestServer or Docker containers
-}
 ```
 
----
-
-## 🚀 Simulation Client Guidelines
-
-Simulation client'ları aşağıdaki senaryoları test etmelidir:
-
-### 1. Load Testing
-- 10M+ daily active ticket validations
-- 100K+ ticket/credit purchases per day
-- 10K+ bus journey tracking events per day
-
-### 2. Failure Scenarios
-- Database connection failures
-- Message bus downtime
-- High latency scenarios
-- Concurrent user conflicts
-
-### 3. Multi-Tenant Isolation
-- Verify tenant A cannot access tenant B's data
-- Test resource quotas per tenant
-- Validate independent scaling
-
-### 4. Zero-Downtime Updates
-- Deploy new version while simulation running
-- Verify no dropped requests
-- Test rollback procedures
+### Test coverage target: >80%
 
 ---
 
-## 📚 Referanslar
+## 9. Performance Targets
 
-- [Domain-Driven Design Distilled](https://www.amazon.com/Domain-Driven-Design-Distilled-Vaughn-Vernon/dp/0134434420)
-- [Building Microservices](https://www.amazon.com/Building-Microservices-Designing-Fine-Grained-Systems/dp/1491950358)
-- [Brighter Documentation](https://www.goparamore.io/)
-- [YARP Documentation](https://microsoft.github.io/reverse-proxy/)
+| Metric | Target |
+|--------|--------|
+| API response (p95) | < 200ms |
+| DB query (p95) | < 50ms |
+| Throughput per tenant | 10K req/sec |
+| Daily ticket validations | 10M+ |
+| Daily purchases | 100K+ |
+| Daily journey events | 10K+ |
+
+---
+
+## 10. Step-by-Step Docs
+
+Development follows numbered step documents in `docs/`:
+
+| Step | Topic |
+|------|-------|
+| 00 | Planning & Requirements |
+| 01 | Initial Setup & Template Cleanup |
+| 02 | Shared Kernel — Domain Base Classes |
+| 03 | Infrastructure — EF Core & Redis |
+| 04 | Identity Service |
+| 05 | Wallet Service |
+| 06 | Telemetry Service |
+| 07 | Event Processor Worker |
+| 08 | API Gateway (YARP) |
+| 09 | Testing |
+| 10 | Simulation Clients |
+| 11 | Docker & Deployment |
+
+> **Rule**: Execute steps sequentially. Do NOT skip ahead. Each step builds on the previous one.
+
+---
+
+## 11. References
+
+- [Brighter Docs](https://www.goparamore.io/)
+- [YARP Docs](https://microsoft.github.io/reverse-proxy/)
 - [OpenTelemetry .NET](https://opentelemetry.io/docs/instrumentation/net/)
+- [EF Core Docs](https://learn.microsoft.com/en-us/ef/core/)
 
 ---
 
-## 🔄 Sürekli İyileştirme
-
-Bu doküman proje ilerledikçe güncellenecektir. Her step'te:
-1. Yeni öğrenilen dersler dokümante edilmeli
-2. Best practice'ler güncellenmeli
-3. Tool set değişiklikleri yansıtılmalı
-4. Simulation senaryoları genişletilmeli
-
-**Son Güncelleme**: 2024  
-**Yazar**: Özgür Can TURNA
+**Last Updated**: 11.06.2026  
+**Author**: Özgür Can TURNA

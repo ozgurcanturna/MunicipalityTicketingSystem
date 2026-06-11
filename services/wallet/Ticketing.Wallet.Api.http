@@ -1,0 +1,6 @@
+@Ticketing.Wallet.Api_HostAddress = http://localhost:5136
+
+GET {{Ticketing.Wallet.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
