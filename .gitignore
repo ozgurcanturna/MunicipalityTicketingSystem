@@ -1,54 +1,5 @@
+```markdown
+# Documentation
+docs/
+
 ```
-# Build artifacts
-*.dll
-*.exe
-*.pdb
-*.so
-*.dylib
-*.o
-*.obj
-*.out
-*.a
-*.lib
-bin/
-obj/
-out/
-
-# Dependencies
-packages/
-node_modules/
-.nuget/
-.nupkg/
-*.nupkg
-
-# Logs
-*.log
-
-# Environment
-.env
-.env.local
-*.env.*
-
-# Editors
-.vscode/
-.vs/
-.idea/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Test and coverage
-coverage/
-htmlcov/
-.coverage
-*.coveragerc
-
-# Temporary files
-*.tmp
-*.temp
-*~
-```
-.vs/MunicipalityTicketing.slnx/DesignTimeBuild/.dtbcache.v2

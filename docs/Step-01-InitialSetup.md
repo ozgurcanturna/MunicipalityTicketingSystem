@@ -64,10 +64,6 @@ Worker template zaten temiz idi, değişiklik yapılmadı.
 ```bash
 # Simulation clients için dizin
 mkdir -p tools/simulator
-
-# Test projeleri için dizinler
-mkdir -p tests/MunicipalityTicketing.UnitTests
-mkdir -p tests/MunicipalityTicketing.IntegrationTests
 ```
 
 ---
@@ -83,7 +79,7 @@ mkdir -p tests/MunicipalityTicketing.IntegrationTests
   - Ticketing.Wallet.Api (services/wallet/)
   - Journey.Telemetry.Api (services/telemetry/)
   - Journey.EventProcessor.Worker (workers/event-processor/)
-  - ApiGateway.Yarp (gateway/)
+  - ApiGateway.Yarp (gateway/ApiGateway.Yarp.csproj)
   - MunicipalityTicketing.Simulator (tools/simulator/)
 
 ### Target Framework
@@ -117,12 +113,10 @@ MunicipalityTicketing/
 ├── workers/
 │   └── event-processor/       ✅ Temiz
 ├── gateway/
-│   └── ApiGateway.Yarp/       ✅ Temiz
+│   ├── ApiGateway.Yarp.csproj  ✅ Temiz
+│   └── Program.cs              ✅ Temiz
 ├── tools/
 │   └── simulator/             📁 Yeni oluşturuldu
-├── tests/
-│   ├── MunicipalityTicketing.UnitTests/ 📁 Yeni oluşturuldu
-│   └── MunicipalityTicketing.IntegrationTests/ 📁 Yeni oluşturuldu
 ├── docs/
 │   ├── skills.md             ✅ Oluşturuldu
 │   ├── Step-00-Planlama.md   ✅ Oluşturuldu
@@ -163,7 +157,7 @@ MunicipalityTicketing/
 - Template kodlar tamamen temizlendi
 - Minimal API yapısı hazır
 - Solution yapısı senaryoya uygun
-- Test ve simulation dizinleri oluşturuldu
+- Simulation dizini oluşturuldu
 - Dokümantasyon altyapısı hazır
 - **Step 02 tamamlandı**: Shared Kernel implementation hazır
 
