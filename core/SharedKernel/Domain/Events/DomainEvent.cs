@@ -1,4 +1,4 @@
-namespace SharedKernel.Domain.Events;
+namespace core.SharedKernel.Domain.Events;
 
 public interface IDomainEvent
 {
@@ -9,7 +9,6 @@ public interface IDomainEvent
 public abstract class DomainEvent : IDomainEvent
 {
     public DateTime OccurredOn { get; } = DateTime.UtcNow;
-    public string EventType => GetType().Name;
 }
 
 public sealed class EntityCreatedEvent : DomainEvent

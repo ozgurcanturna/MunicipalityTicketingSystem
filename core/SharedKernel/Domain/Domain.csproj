@@ -1,10 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <RootNamespace>SharedKernel.Domain</RootNamespace>
+    <RootNamespace>core.SharedKernel.Domain</RootNamespace>
   </PropertyGroup>
-
 </Project>

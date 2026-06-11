@@ -1,10 +1,14 @@
 <Solution>
-  <Project Path="core/SharedKernel.Domain.csproj" />
+  <Folder Name="/core/" />
+  <Folder Name="/core/SharedKernel/">
+    <Project Path="core/SharedKernel/Domain/Domain.csproj" />
+    <Project Path="core/SharedKernel/Infrastructure/Infrastructure.csproj" Id="f13398bb-b992-4e21-ab1d-5d15bf699fa5" />
+  </Folder>
   <Project Path="core/SharedKernel.Infrastructure.csproj" />
   <Project Path="gateway/ApiGateway.Yarp.csproj" />
-  <Project Path="workers/event-processor/Journey.EventProcessor.Worker.csproj" />
-  <Project Path="services/telemetry/Journey.Telemetry.Api.csproj" />
   <Project Path="services/identity/Tenant.Identity.Api.csproj" />
+  <Project Path="services/telemetry/Journey.Telemetry.Api.csproj" />
   <Project Path="services/wallet/Ticketing.Wallet.Api.csproj" />
   <Project Path="tools/simulator/MunicipalityTicketing.Simulator.csproj" />
+  <Project Path="workers/event-processor/Journey.EventProcessor.Worker.csproj" />
 </Solution>

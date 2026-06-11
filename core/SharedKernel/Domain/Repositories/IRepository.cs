@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
-using SharedKernel.Domain.Entities;
+using core.SharedKernel.Domain.Entities;
 
-namespace SharedKernel.Domain.Repositories;
+namespace core.SharedKernel.Domain.Repositories;
 
 public interface IRepository<TEntity> where TEntity : AggregateRoot
 {

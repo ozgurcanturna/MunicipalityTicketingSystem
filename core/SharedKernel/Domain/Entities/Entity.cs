@@ -1,6 +1,6 @@
-namespace SharedKernel.Domain.Entities;
+using core.SharedKernel.Domain.Events;
 
-using SharedKernel.Domain.Events;
+namespace core.SharedKernel.Domain.Entities;
 
 public abstract class Entity
 {
@@ -9,7 +9,7 @@ public abstract class Entity
     public Guid Id { get; protected set; } = Guid.NewGuid();
     public DateTime CreatedAt { get; protected set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; protected set; }
-    public IReadOnlyCollection<IDomainEvent> DomainEvents => (IReadOnlyCollection<IDomainEvent>?)_domainEvents?.AsReadOnly() ?? new List<IDomainEvent>();
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents?.AsReadOnly() ?? (IReadOnlyCollection<IDomainEvent>)Array.Empty<IDomainEvent>();
 
     protected void AddDomainEvent(IDomainEvent domainEvent)
     {

@@ -1,6 +1,6 @@
-namespace SharedKernel.Domain.Entities;
+namespace core.SharedKernel.Domain.Entities;
 
-using SharedKernel.Domain.Events;
+using core.SharedKernel.Domain.Events;
 
 public abstract class AggregateRoot : Entity
 {

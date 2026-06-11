@@ -25,6 +25,7 @@ vendor/
 
 # Editors
 .vscode/
+.vs/
 .idea/
 *.swp
 *.swo

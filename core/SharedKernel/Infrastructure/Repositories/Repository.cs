@@ -1,14 +1,15 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using SharedKernel.Domain.Entities;
-using SharedKernel.Domain.Repositories;
-using SharedKernel.Infrastructure.Persistence;
+using core.SharedKernel.Domain.Entities;
+using core.SharedKernel.Domain.Repositories;
 
-namespace SharedKernel.Infrastructure.Repositories;
+using core.SharedKernel.Infrastructure.Persistence;
+
+namespace core.SharedKernel.Infrastructure.Repositories;
 
 public class Repository<TEntity> : IRepository<TEntity> where TEntity : AggregateRoot
 {
-    protected readonly AppDbContext _dbContext;
+    protected readonly  AppDbContext _dbContext;
 
     public Repository(AppDbContext dbContext)
     {
