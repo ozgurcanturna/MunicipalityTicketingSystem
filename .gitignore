@@ -31,6 +31,7 @@ node_modules/
 
 # Editors
 .vscode/
+.vs/
 .idea/
 *.swp
 *.swo
@@ -50,3 +51,4 @@ htmlcov/
 *.temp
 *~
 ```
+.vs/MunicipalityTicketing.slnx/DesignTimeBuild/.dtbcache.v2
