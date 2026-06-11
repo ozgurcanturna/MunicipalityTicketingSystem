@@ -139,6 +139,7 @@ MunicipalityTicketing/
 | [docs/Step-06-TelemetryService.md](docs/Step-06-TelemetryService.md) | Telemetry domain, persistence ve API adımları |
 | [docs/Step-07-EventProcessor.md](docs/Step-07-EventProcessor.md) | Event consumer, retry ve dead-letter adımları |
 | [docs/Step-08-ApiGateway.md](docs/Step-08-ApiGateway.md) | Gateway routing, header ve rate-limit adımları |
+| [docs/Step-09-Testing.md](docs/Step-09-Testing.md) | Unit ve integration test adımları |
 
 ---
 
@@ -188,7 +189,7 @@ Proje tamamlandığında simulation client'ları ile aşağıdaki senaryolar tes
 | 06 | Telemetry Service | ✅ Tamamlandı |
 | 07 | Event Processor | ✅ Tamamlandı |
 | 08 | API Gateway | ✅ Tamamlandı |
-| 09 | Testing | 📝 Planlandı |
+| 09 | Testing | ✅ Tamamlandı |
 | 10 | Simulation Clients | 📝 Planlandı |
 | 11 | Docker & Deployment | 📝 Planlandı |
 
