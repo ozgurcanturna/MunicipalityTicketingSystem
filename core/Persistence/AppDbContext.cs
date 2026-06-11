@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SharedKernel.Domain.Repositories;
 
 namespace SharedKernel.Infrastructure.Persistence;
 

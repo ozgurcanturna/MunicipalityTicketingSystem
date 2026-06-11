@@ -1,5 +1,7 @@
 namespace SharedKernel.Domain.Entities;
 
+using SharedKernel.Domain.Events;
+
 public abstract class AggregateRoot : Entity
 {
     public long Version { get; private set; } = 1;

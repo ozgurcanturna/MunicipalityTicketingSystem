@@ -15,7 +15,7 @@ public abstract class ValueObject
         return !EqualOperator(left, right);
     }
 
-    protected override bool Equals(object? obj)
+    public override bool Equals(object? obj)
     {
         if (obj is null || obj.GetType() != GetType())
             return false;

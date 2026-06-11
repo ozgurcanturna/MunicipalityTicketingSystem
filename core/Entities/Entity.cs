@@ -1,5 +1,7 @@
 namespace SharedKernel.Domain.Entities;
 
+using SharedKernel.Domain.Events;
+
 public abstract class Entity
 {
     public Guid Id { get; protected set; } = Guid.NewGuid();
@@ -9,7 +11,7 @@ public abstract class Entity
     private readonly List<IDomainEvent> _domainEvents = new();
     public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-    public virtual void AddDomainEvent(IDomainEvent domainEvent)
+    protected virtual void AddDomainEvent(IDomainEvent domainEvent)
     {
         _domainEvents.Add(domainEvent);
     }
