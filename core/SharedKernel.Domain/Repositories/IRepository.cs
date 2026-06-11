@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using SharedKernel.Domain.Entities;
 
 namespace SharedKernel.Domain.Repositories;
 

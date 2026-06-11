@@ -2,6 +2,7 @@ using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using SharedKernel.Domain.Entities;
 using SharedKernel.Domain.Repositories;
+using SharedKernel.Infrastructure.Persistence;
 
 namespace SharedKernel.Infrastructure.Repositories;
 
