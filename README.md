@@ -132,6 +132,8 @@ MunicipalityTicketing/
 | [docs/skills.md](docs/skills.md) | Developer becerileri ve kodlama standartları |
 | [docs/Step-00-Planlama.md](docs/Step-00-Planlama.md) | İş gereksinimleri, mimari, tool set |
 | [docs/Step-01-InitialSetup.md](docs/Step-01-InitialSetup.md) | Proje kurulumu ve temizlik adımları |
+| [docs/Step-02-SharedKernel.md](docs/Step-02-SharedKernel.md) | Shared Kernel domain ve infrastructure adımları |
+| [docs/Step-03-Infrastructure.md](docs/Step-03-Infrastructure.md) | EF Core ve Redis altyapı hazırlığı |
 
 ---
 
@@ -173,9 +175,9 @@ Proje tamamlandığında simulation client'ları ile aşağıdaki senaryolar tes
 | Step | Konu | Durum |
 |------|------|-------|
 | 00 | Planlama ve Gereksinimler | ✅ Tamamlandı |
-| 01 | Initial Setup - Template Temizliği | 📝 Planlandı |
-| 02 | Shared Kernel - Domain Base Classes | 📝 Planlandı |
-| 03 | Infrastructure - EF Core & Redis | 📝 Planlandı |
+| 01 | Initial Setup - Template Temizliği | ✅ Tamamlandı |
+| 02 | Shared Kernel - Domain Base Classes | ✅ Tamamlandı |
+| 03 | Infrastructure - EF Core & Redis | ✅ Tamamlandı |
 | 04 | Identity Service | 📝 Planlandı |
 | 05 | Wallet Service | 📝 Planlandı |
 | 06 | Telemetry Service | 📝 Planlandı |

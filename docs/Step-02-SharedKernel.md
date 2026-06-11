@@ -1,18 +1,22 @@
 # Step 02: Shared Kernel Implementation
 
-## Amaç
-Bu adımda, Domain-Driven Design (DDD) prensiplerine uygun olarak tüm mikroservislerin ortak kullanacağı temel sınıfları ve interface'leri içeren **Shared Kernel** katmanını oluşturuyoruz.
+## 🎯 Amaç
+Bu adımda, tüm servislerin ortak kullanacağı Shared Kernel katmanı oluşturulur. Çıktı olarak Domain ve Infrastructure katmanlarında tekrar kullanılabilir temel sınıflar, event altyapısı ve generic repository yapısı hazırlanır.
+
+## ✅ Beklenen Çıktılar
+- SharedKernel.Domain projesi oluşturulmuş ve derlenebilir olmalı.
+- SharedKernel.Infrastructure projesi oluşturulmuş, Domain'e referans vermeli ve derlenebilir olmalı.
+- Entity, AggregateRoot, ValueObject, DomainEvent ve Repository altyapısı kodlanmış olmalı.
+- Solution içerisine SharedKernel projeleri eklenmiş olmalı.
 
 ## Önkoşullar
-- .NET 10 SDK kurulu olmalı
-- Step 01'deki temizlik işlemleri tamamlanmış olmalı
+- .NET 10 SDK kurulu olmalı.
+- Step 01 tamamlanmış olmalı.
 
-## Adım 1: Proje Yapısını Oluşturma
+## 1) Proje Yapısı
 
-### 1.1. Dizin Yapısı
-Aşağıdaki dizin yapısını `core/` altında oluşturun:
-
-```
+### 1.1 Hedef dizin yapısı
+```text
 core/
 └── SharedKernel/
     ├── Domain/
@@ -23,80 +27,138 @@ core/
     │   │   └── AggregateRoot.cs
     │   ├── Events/
     │   │   └── DomainEvent.cs
-    │   └── Repositories/
-    │       └── IRepository.cs
+    │   ├── Repositories/
+    │   │   └── IRepository.cs
+    │   └── SharedKernel.Domain.csproj
     └── Infrastructure/
         ├── Persistence/
         │   └── AppDbContext.cs
-        └── Repositories/
-            └── Repository.cs
+        ├── Repositories/
+        │   └── Repository.cs
+        └── SharedKernel.Infrastructure.csproj
 ```
 
-### 1.2. Komutlarla Oluşturma
-
-```bash
-# Shared Kernel dizinlerini oluştur
-mkdir -p core/SharedKernel/Domain/{Entities,Events,Common,Repositories}
-mkdir -p core/SharedKernel/Infrastructure/{Persistence,Repositories}
+### 1.2 PowerShell ile dizinleri oluşturma
+```powershell
+New-Item -ItemType Directory -Force -Path core/SharedKernel/Domain/Common
+New-Item -ItemType Directory -Force -Path core/SharedKernel/Domain/Entities
+New-Item -ItemType Directory -Force -Path core/SharedKernel/Domain/Events
+New-Item -ItemType Directory -Force -Path core/SharedKernel/Domain/Repositories
+New-Item -ItemType Directory -Force -Path core/SharedKernel/Infrastructure/Persistence
+New-Item -ItemType Directory -Force -Path core/SharedKernel/Infrastructure/Repositories
 ```
 
-## Adım 2: SharedKernel.Domain Projesi
+## 2) SharedKernel.Domain
 
-### 2.1. Proje Dosyası
-`core/SharedKernel/Domain/SharedKernel.Domain.csproj`:
+### 2.1 SharedKernel.Domain.csproj
+Dosya: core/SharedKernel/Domain/SharedKernel.Domain.csproj
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>SharedKernel.Domain</RootNamespace>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="Common\" />
+    <Folder Include="Entities\" />
+    <Folder Include="Events\" />
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Common\ValueObject.cs" />
+    <Compile Include="Entities\AggregateRoot.cs" />
+    <Compile Include="Entities\Entity.cs" />
+    <Compile Include="Events\DomainEvent.cs" />
+    <Compile Include="Repositories\IRepository.cs" />
+  </ItemGroup>
+
 </Project>
 ```
 
-### 2.2. Entity Temel Sınıfı
-**Dosya:** `Entities/Entity.cs`
-
-Tüm domain entity'leri için temel sınıf. Her entity'nin bir kimliği, audit alanları ve domain event desteği vardır.
-
-**Özellikler:**
-- `Id`: Guid tipinde benzersiz kimlik
-- `CreatedAt`, `UpdatedAt`: Audit zaman damgaları
-- `DomainEvents`: Domain event koleksiyonu
-- Value-based equality (==, !=, Equals, GetHashCode)
+### 2.2 Entity.cs
+Dosya: core/SharedKernel/Domain/Entities/Entity.cs
 
 ```csharp
+using SharedKernel.Domain.Events;
+
 namespace SharedKernel.Domain.Entities;
 
 public abstract class Entity
 {
-    private List<IDomainEvent>? _domainEvents;
-    
+    private readonly List<IDomainEvent> _domainEvents = [];
+
     public Guid Id { get; protected set; } = Guid.NewGuid();
     public DateTime CreatedAt { get; protected set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; protected set; }
-    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents?.AsReadOnly() ?? new List<IDomainEvent>();
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-    protected void AddDomainEvent(IDomainEvent domainEvent) { ... }
-    public IEnumerable<IDomainEvent> ClearDomainEvents() { ... }
-    protected void MarkAsModified() { UpdatedAt = DateTime.UtcNow; }
-    
-    // Equality operators
-    public override bool Equals(object? obj) { ... }
-    public override int GetHashCode() { ... }
-    public static bool operator ==(Entity left, Entity right) { ... }
-    public static bool operator !=(Entity left, Entity right) { ... }
+    protected void AddDomainEvent(IDomainEvent domainEvent)
+    {
+        _domainEvents.Add(domainEvent);
+    }
+
+    public IReadOnlyCollection<IDomainEvent> ClearDomainEvents()
+    {
+        var domainEvents = _domainEvents.ToArray();
+        _domainEvents.Clear();
+        return domainEvents;
+    }
+
+    protected void MarkAsModified()
+    {
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public override bool Equals(object? obj)
+    {
+        if (obj is not Entity other)
+        {
+            return false;
+        }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        if (GetType() != other.GetType())
+        {
+            return false;
+        }
+
+        return Id != Guid.Empty && Id == other.Id;
+    }
+
+    public override int GetHashCode()
+    {
+        return HashCode.Combine(GetType(), Id);
+    }
+
+    public static bool operator ==(Entity? left, Entity? right)
+    {
+        return Equals(left, right);
+    }
+
+    public static bool operator !=(Entity? left, Entity? right)
+    {
+        return !Equals(left, right);
+    }
 }
 ```
 
-### 2.3. Aggregate Root Temel Sınıfı
-**Dosya:** `Entities/AggregateRoot.cs`
-
-DDD'de aggregate root, bir tutarlılık sınırının giriş noktasıdır. Tüm iş kuralları burada uygulanır.
+### 2.3 AggregateRoot.cs
+Dosya: core/SharedKernel/Domain/Entities/AggregateRoot.cs
 
 ```csharp
+using SharedKernel.Domain.Events;
+
 namespace SharedKernel.Domain.Entities;
 
 public abstract class AggregateRoot : Entity
@@ -111,45 +173,24 @@ public abstract class AggregateRoot : Entity
 
     protected void RegisterCreated()
     {
-        AddDomainEvent(new DomainEvents.EntityCreatedEvent(Id));
+        AddDomainEvent(new EntityCreatedEvent(Id));
+    }
+
+    protected void RegisterUpdated()
+    {
+        RaiseVersion();
+        AddDomainEvent(new EntityUpdatedEvent(Id));
     }
 
     protected void RegisterDeleted()
     {
-        AddDomainEvent(new DomainEvents.EntityDeletedEvent(Id));
+        AddDomainEvent(new EntityDeletedEvent(Id));
     }
 }
 ```
 
-**Kullanım Örneği:**
-```csharp
-public class User : AggregateRoot
-{
-    public string Email { get; private set; }
-    public string Name { get; private set; }
-
-    private User() { } // EF Core için
-
-    public static User Create(string email, string name)
-    {
-        var user = new User { Email = email, Name = name };
-        user.RegisterCreated();
-        return user;
-    }
-
-    public void UpdateName(string newName)
-    {
-        Name = newName;
-        RaiseVersion();
-        AddDomainEvent(new UserUpdatedEvent(Id));
-    }
-}
-```
-
-### 2.4. Value Object Temel Sınıfı
-**Dosya:** `Common/ValueObject.cs`
-
-Kimliği olmayan, sadece özellikleriyle tanımlanan nesneler için temel sınıf.
+### 2.4 ValueObject.cs
+Dosya: core/SharedKernel/Domain/Common/ValueObject.cs
 
 ```csharp
 namespace SharedKernel.Domain.Common;
@@ -158,38 +199,36 @@ public abstract class ValueObject
 {
     protected abstract IEnumerable<object?> GetEqualityComponents();
 
-    public override bool Equals(object? obj) { ... }
-    public override int GetHashCode() { ... }
-    public static bool operator ==(ValueObject left, ValueObject right) { ... }
-    public static bool operator !=(ValueObject left, ValueObject right) { ... }
+    public override bool Equals(object? obj)
+    {
+        if (obj is not ValueObject other || other.GetType() != GetType())
+        {
+            return false;
+        }
+
+        return GetEqualityComponents().SequenceEqual(other.GetEqualityComponents());
+    }
+
+    public override int GetHashCode()
+    {
+        return GetEqualityComponents()
+            .Aggregate(0, (current, component) => HashCode.Combine(current, component));
+    }
+
+    public static bool operator ==(ValueObject? left, ValueObject? right)
+    {
+        return Equals(left, right);
+    }
+
+    public static bool operator !=(ValueObject? left, ValueObject? right)
+    {
+        return !Equals(left, right);
+    }
 }
 ```
 
-**Kullanım Örneği:**
-```csharp
-public class Money : ValueObject
-{
-    public decimal Amount { get; }
-    public string Currency { get; }
-
-    public Money(decimal amount, string currency)
-    {
-        Amount = amount;
-        Currency = currency;
-    }
-
-    protected override IEnumerable<object?> GetEqualityComponents()
-    {
-        yield return Amount;
-        yield return Currency;
-    }
-}
-```
-
-### 2.5. Domain Event Interface ve Sınıfları
-**Dosya:** `Events/DomainEvent.cs`
-
-Domain katmanında gerçekleşen önemli olayları temsil eder.
+### 2.5 DomainEvent.cs
+Dosya: core/SharedKernel/Domain/Events/DomainEvent.cs
 
 ```csharp
 namespace SharedKernel.Domain.Events;
@@ -205,38 +244,38 @@ public abstract class DomainEvent : IDomainEvent
     public DateTime OccurredOn { get; } = DateTime.UtcNow;
 }
 
-public sealed class EntityCreatedEvent : DomainEvent
+public sealed class EntityCreatedEvent(Guid entityId) : DomainEvent
 {
-    public Guid EntityId { get; }
-    public EntityCreatedEvent(Guid entityId) => EntityId = entityId;
+    public Guid EntityId { get; } = entityId;
 }
 
-public sealed class EntityDeletedEvent : DomainEvent
+public sealed class EntityUpdatedEvent(Guid entityId) : DomainEvent
 {
-    public Guid EntityId { get; }
-    public EntityDeletedEvent(Guid entityId) => EntityId = entityId;
+    public Guid EntityId { get; } = entityId;
 }
 
-public sealed class EntityUpdatedEvent : DomainEvent
+public sealed class EntityDeletedEvent(Guid entityId) : DomainEvent
 {
-    public Guid EntityId { get; }
-    public EntityUpdatedEvent(Guid entityId) => EntityId = entityId;
+    public Guid EntityId { get; } = entityId;
 }
 ```
 
-### 2.6. Repository Interface
-**Dosya:** `Repositories/IRepository.cs`
-
-Persistence katmanı için soyutlama sağlar.
+### 2.6 IRepository.cs
+Dosya: core/SharedKernel/Domain/Repositories/IRepository.cs
 
 ```csharp
+using System.Linq.Expressions;
+using SharedKernel.Domain.Entities;
+
 namespace SharedKernel.Domain.Repositories;
 
 public interface IRepository<TEntity> : IRepository where TEntity : AggregateRoot
 {
     Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
     Task<IReadOnlyList<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<IReadOnlyList<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<TEntity>> FindAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken cancellationToken = default);
     Task AddAsync(TEntity entity, CancellationToken cancellationToken = default);
     void Update(TEntity entity);
     void Delete(TEntity entity);
@@ -248,42 +287,59 @@ public interface IRepository
 }
 ```
 
-## Adım 3: SharedKernel.Infrastructure Projesi
+## 3) SharedKernel.Infrastructure
 
-### 3.1. Proje Dosyası
-**Dosya:** `core/SharedKernel/Infrastructure/SharedKernel.Infrastructure.csproj`
+### 3.1 SharedKernel.Infrastructure.csproj
+Dosya: core/SharedKernel/Infrastructure/SharedKernel.Infrastructure.csproj
 
 ```xml
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>SharedKernel.Infrastructure</RootNamespace>
+    <EnableDefaultItems>false</EnableDefaultItems>
   </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.9" />
-    </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Persistence\" />
+    <Folder Include="Repositories\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="Persistence\AppDbContext.cs" />
+    <Compile Include="Repositories\Repository.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.9" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\SharedKernel.Domain.csproj" />
   </ItemGroup>
+
 </Project>
 ```
 
-### 3.2. AppDbContext Temel Sınıfı
-**Dosya:** `Persistence/AppDbContext.cs`
-
-Tüm mikroservislerin DbContext sınıfları bu sınıftan türer.
+### 3.2 AppDbContext.cs
+Dosya: core/SharedKernel/Infrastructure/Persistence/AppDbContext.cs
 
 ```csharp
+using Microsoft.EntityFrameworkCore;
+using SharedKernel.Domain.Entities;
+
 namespace SharedKernel.Infrastructure.Persistence;
 
 public abstract class AppDbContext : DbContext
 {
-    protected AppDbContext(DbContextOptions options) : base(options) { }
+    protected AppDbContext(DbContextOptions options)
+        : base(options)
+    {
+    }
 
     public override int SaveChanges()
     {
@@ -291,115 +347,177 @@ public abstract class AppDbContext : DbContext
         return base.SaveChanges();
     }
 
-    public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
     {
         UpdateAuditableEntities();
-        return await base.SaveChangesAsync(cancellationToken);
+        return base.SaveChanges(acceptAllChangesOnSuccess);
     }
 
-    private void UpdateAuditableEntities()
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        var now = DateTime.UtcNow;
-        var modifiedEntities = ChangeTracker.Entries<Domain.Entities.Entity>()
-            .Where(e => e.State == EntityState.Modified)
-            .Select(e => e.Entity);
+        UpdateAuditableEntities();
+        return base.SaveChangesAsync(cancellationToken);
+    }
 
-        foreach (var entity in modifiedEntities)
-        {
-            entity.GetType().GetProperty("UpdatedAt")?.SetValue(entity, now);
-        }
+    public override Task<int> SaveChangesAsync(
+        bool acceptAllChangesOnSuccess,
+        CancellationToken cancellationToken = default)
+    {
+        UpdateAuditableEntities();
+        return base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+        ConfigureMultiTenancy(modelBuilder);
     }
 
     protected virtual void ConfigureMultiTenancy(ModelBuilder modelBuilder)
     {
-        // Multi-tenancy desteği için alt sınıflar tarafından override edilir
+    }
+
+    private void UpdateAuditableEntities()
+    {
+        var utcNow = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries<Entity>())
+        {
+            if (entry.State == EntityState.Added)
+            {
+                entry.Property(entity => entity.CreatedAt).CurrentValue = utcNow;
+                entry.Property(entity => entity.UpdatedAt).CurrentValue = null;
+            }
+
+            if (entry.State == EntityState.Modified)
+            {
+                entry.Property(entity => entity.UpdatedAt).CurrentValue = utcNow;
+            }
+        }
     }
 }
 ```
 
-### 3.3. Generic Repository Implementasyonu
-**Dosya:** `Repositories/Repository.cs`
+### 3.3 Repository.cs
+Dosya: core/SharedKernel/Infrastructure/Repositories/Repository.cs
 
 ```csharp
+using System.Linq.Expressions;
+using Microsoft.EntityFrameworkCore;
+using SharedKernel.Domain.Entities;
+using SharedKernel.Domain.Repositories;
+using SharedKernel.Infrastructure.Persistence;
+
 namespace SharedKernel.Infrastructure.Repositories;
 
 public class Repository<TEntity> : IRepository<TEntity> where TEntity : AggregateRoot
 {
-    protected readonly DbContext _dbContext;
+    protected readonly AppDbContext DbContext;
+    protected readonly DbSet<TEntity> DbSet;
 
-    public Repository(DbContext dbContext) => _dbContext = dbContext;
-
-    public virtual async Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public Repository(AppDbContext dbContext)
     {
-        return await _dbContext.Set<TEntity>().FindAsync(new object[] { id }, cancellationToken);
+        DbContext = dbContext;
+        DbSet = dbContext.Set<TEntity>();
     }
 
-    public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
+    public Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Set<TEntity>().ToListAsync(cancellationToken);
+        return DbSet.FirstOrDefaultAsync(entity => entity.Id == id, cancellationToken);
     }
 
-    public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        await _dbContext.Set<TEntity>().AddAsync(entity, cancellationToken);
+        return await DbSet.ToListAsync(cancellationToken);
     }
 
-    public virtual void Update(TEntity entity) => _dbContext.Set<TEntity>().Update(entity);
-    public virtual void Delete(TEntity entity) => _dbContext.Set<TEntity>().Remove(entity);
-
-    public virtual async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<TEntity>> FindAsync(
+        Expression<Func<TEntity, bool>> predicate,
+        CancellationToken cancellationToken = default)
     {
-        return await _dbContext.Set<TEntity>().Where(predicate).ToListAsync(cancellationToken);
+        return await DbSet.Where(predicate).ToListAsync(cancellationToken);
     }
 
-    public virtual Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    public Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        return _dbContext.SaveChangesAsync(cancellationToken);
+        return DbSet.AddAsync(entity, cancellationToken).AsTask();
+    }
+
+    public void Update(TEntity entity)
+    {
+        DbSet.Update(entity);
+    }
+
+    public void Delete(TEntity entity)
+    {
+        DbSet.Remove(entity);
+    }
+
+    public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        return DbContext.SaveChangesAsync(cancellationToken);
     }
 }
 ```
 
-## Adım 4: Çözüm Dosyasına Projeleri Ekleme
+## 4) Solution'a projeleri ekleme
 
-Mevcut `MunicipalityTicketing.slnx` çözüm dosyasına yeni projeleri ekleyin:
-
-```bash
+```powershell
 dotnet sln MunicipalityTicketing.slnx add core/SharedKernel/Domain/SharedKernel.Domain.csproj
 dotnet sln MunicipalityTicketing.slnx add core/SharedKernel/Infrastructure/SharedKernel.Infrastructure.csproj
 ```
 
-## Adım 5: Build Testi
+Not: Projeler zaten ekliyse komut bilgi mesajı verebilir.
 
-Projelerin doğru şekilde oluşturulduğunu test edin:
+## 5) Doğrulama
 
-```bash
+```powershell
 dotnet build core/SharedKernel/Domain/SharedKernel.Domain.csproj
 dotnet build core/SharedKernel/Infrastructure/SharedKernel.Infrastructure.csproj
+dotnet build MunicipalityTicketing.slnx
+dotnet test MunicipalityTicketing.slnx
 ```
 
-## Özet
+## 6) Step 02 Tamamlanma Kontrol Listesi
 
-Bu adımda şunları oluşturduk:
-- ⬜ **Entity**: Tüm domain entity'leri için temel sınıf
-- ⬜ **AggregateRoot**: DDD aggregate root implementasyonu
-- ⬜ **ValueObject**: Değer nesneleri için temel sınıf
-- ⬜ **IDomainEvent & DomainEvent**: Domain event altyapısı
-- ⬜ **IRepository**: Generic repository interface
-- ⬜ **AppDbContext**: EF Core DbContext temel sınıfı
-- ⬜ **Repository<T>**: Generic repository implementasyonu
+- ✅ Domain base sınıfları oluşturuldu.
+- ✅ Domain event altyapısı oluşturuldu.
+- ✅ Generic repository sözleşmesi oluşturuldu.
+- ✅ Infrastructure AppDbContext ve generic repository implementasyonu tamamlandı.
+- ✅ SharedKernel projeleri solution içinde.
+- ✅ Build ve testler başarılı.
 
-## Sonraki Adım
+## 7) Sonraki Adımlar İçin İhtiyaç Analizi
 
-Bir sonraki adımda (**Step 03**), bu shared kernel'ı kullanarak ilk mikroservisimiz olan **Tenant.Identity.Api** projesini geliştireceğiz:
-- Tenant (Belediye) entity'si
-- User entity'si
-- Identity servisleri
-- API endpoints
+Step 03 ve sonrasında zorlanmamak için bu adımın üzerine aşağıdaki ihtiyaçlar netleştirilmelidir.
 
-## Notlar
+### 7.1 Teknik ihtiyaçlar
+- Her servis için kendi DbContext sınıfı (örnek: IdentityDbContext, WalletDbContext, TelemetryDbContext).
+- Her servis için ayrı connection string ve tenant çözümleme stratejisi.
+- EF Core migration stratejisi (servis bazlı migration klasörü).
+- Domain event publish mekanizması (outbox veya transaction sonrası dispatcher).
+- Ortak error-handling ve Result pattern standardı.
 
-- Tüm kodlar **nullable reference types** kullanır
-- **Implicit usings** etkinleştirilmiştir
-- EF Core 9.0 kullanılmıştır (.NET 10 ile uyumlu)
-- Domain event pattern ile loose coupling sağlanmıştır
-- Repository pattern ile persistence soyutlaması yapılmıştır
+### 7.2 Step 03 için minimum backlog
+1. SharedKernel.Infrastructure üzerine tenant-aware DbContext tabanı ekleme.
+2. Servis projelerine SharedKernel referanslarını ekleme.
+3. Identity servisinde ilk aggregate (Tenant/User) modelleme.
+4. İlk repository implementasyonunun servis bazında türetilmesi.
+5. İlk migration ve local çalışma doğrulaması.
+
+### 7.3 Test ihtiyaçları
+1. Entity ve ValueObject eşitlik davranışı için unit test.
+2. Repository temel CRUD davranışı için integration test.
+3. AppDbContext audit alanlarının otomatik set edilmesi için test.
+
+## 8) Notlar
+
+- Proje .NET 10 ve EF Core 10.0.9 ile çalışır.
+- Nullable reference types ve implicit usings açıktır.
+- Projede explicit compile yaklaşımı kullanıldığı için yeni dosya eklendiğinde csproj dosyasına Include satırı eklenmelidir.
+
+---
+
+**Durum**: ✅ Tamamlandı  
+**Son Güncelleme**: 11.06.2026  
+**Yazar**: Özgür Can TURNA
