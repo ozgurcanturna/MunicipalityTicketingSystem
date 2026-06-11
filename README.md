@@ -136,6 +136,7 @@ MunicipalityTicketing/
 | [docs/Step-03-Infrastructure.md](docs/Step-03-Infrastructure.md) | EF Core ve Redis altyapı hazırlığı |
 | [docs/Step-04-IdentityService.md](docs/Step-04-IdentityService.md) | Identity domain, persistence ve API adımları |
 | [docs/Step-05-WalletService.md](docs/Step-05-WalletService.md) | Wallet domain, persistence ve API adımları |
+| [docs/Step-06-TelemetryService.md](docs/Step-06-TelemetryService.md) | Telemetry domain, persistence ve API adımları |
 
 ---
 
@@ -182,7 +183,7 @@ Proje tamamlandığında simulation client'ları ile aşağıdaki senaryolar tes
 | 03 | Infrastructure - EF Core & Redis | ✅ Tamamlandı |
 | 04 | Identity Service | ✅ Tamamlandı |
 | 05 | Wallet Service | ✅ Tamamlandı |
-| 06 | Telemetry Service | 📝 Planlandı |
+| 06 | Telemetry Service | ✅ Tamamlandı |
 | 07 | Event Processor | 📝 Planlandı |
 | 08 | API Gateway | 📝 Planlandı |
 | 09 | Testing | 📝 Planlandı |
