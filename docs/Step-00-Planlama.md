@@ -277,7 +277,8 @@ MunicipalityTicketing/
 ├── workers/                   # Background Workers
 │   └── event-processor/       # Journey.EventProcessor.Worker
 ├── gateway/                   # API Gateway
-│   └── ApiGateway.Yarp/
+│   ├── ApiGateway.Yarp.csproj
+│   └── Program.cs
 ├── tools/                     # Development Tools
 │   └── simulator/             # Load testing clients
 ├── tests/
@@ -311,6 +312,6 @@ MunicipalityTicketing/
 
 ---
 
-**Doküman Durumu**: ✅ Tamamlandı  
+**Doküman Durumu**: ✅ Tamamlandı (Doğrulandı)  
 **Son Güncelleme**: 11.06.2026  
 **Yazar**: Özgür Can TURNA

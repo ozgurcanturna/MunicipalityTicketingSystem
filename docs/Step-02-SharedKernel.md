@@ -232,15 +232,14 @@ Persistence katmanı için soyutlama sağlar.
 ```csharp
 namespace SharedKernel.Domain.Repositories;
 
-public interface IRepository<TEntity> where TEntity : AggregateRoot
+public interface IRepository<TEntity> : IRepository where TEntity : AggregateRoot
 {
     Task<TEntity?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
+    Task<IReadOnlyList<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
     Task AddAsync(TEntity entity, CancellationToken cancellationToken = default);
     void Update(TEntity entity);
     void Delete(TEntity entity);
-    Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
-    Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }
 
 public interface IRepository
@@ -263,10 +262,10 @@ public interface IRepository
     <RootNamespace>SharedKernel.Infrastructure</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="9.0.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="10.0.9" />
+    </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Domain\SharedKernel.Domain.csproj" />
