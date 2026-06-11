@@ -1,47 +1,52 @@
 ```
 # Build artifacts
-bin/
-obj/
 *.dll
 *.exe
 *.pdb
 *.so
 *.dylib
-*.class
+*.o
+*.obj
+*.out
+*.a
+*.lib
+bin/
+obj/
+out/
 
 # Dependencies
 packages/
 node_modules/
-venv/
-.venv/
-__pycache__/
-*.egg-info/
+.nuget/
+.nupkg/
+*.nupkg
 
-# IDE files
-.vs/
-.idea/
-*.userprefs
-*.suo
-*.user
-*.aps
-*.ncb
+# Logs
 *.log
 
 # Environment
 .env
 .env.local
-.env.*
+*.env.*
 
-# OS generated files
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
 .DS_Store
 Thumbs.db
-desktop.ini
 
-# Logs
-*.log
-
-# Test coverage
+# Test and coverage
 coverage/
 htmlcov/
 .coverage
+*.coveragerc
+
+# Temporary files
+*.tmp
+*.temp
+*~
 ```
