@@ -16,9 +16,9 @@ public sealed class MunicipalityTenantTests
     public void AddUser_WhenSameEmailAddedTwice_ShouldThrow()
     {
         var tenant = MunicipalityTenant.Create("ankara");
-        tenant.AddUser("user@sample.com", "Test User");
+        tenant.AddUser("user@sample.com", "Test User", "hash-1", "ADMIN");
 
-        var action = () => tenant.AddUser("USER@sample.com", "Another User");
+        var action = () => tenant.AddUser("USER@sample.com", "Another User", "hash-2", "USER");
 
         Assert.Throws<InvalidOperationException>(action);
     }
@@ -29,7 +29,7 @@ public sealed class MunicipalityTenantTests
         var tenant = MunicipalityTenant.Create("ankara");
         tenant.Deactivate();
 
-        var action = () => tenant.AddUser("user@sample.com", "Test User");
+        var action = () => tenant.AddUser("user@sample.com", "Test User", "hash-1", "USER");
 
         Assert.Throws<InvalidOperationException>(action);
     }

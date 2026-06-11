@@ -7,6 +7,7 @@ public sealed record UserResponse(
     Guid TenantId,
     string Email,
     string FullName,
+    string Role,
     bool IsActive,
     DateTime CreatedAt,
     DateTime? LastLoginAt)
@@ -18,6 +19,7 @@ public sealed record UserResponse(
             user.TenantId,
             user.Email,
             user.FullName,
+            user.Role,
             user.IsActive,
             user.CreatedAt,
             user.LastLoginAt);

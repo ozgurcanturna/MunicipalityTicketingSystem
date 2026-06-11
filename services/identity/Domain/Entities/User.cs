@@ -7,6 +7,8 @@ public sealed class User : Entity
     public Guid TenantId { get; private set; }
     public string Email { get; private set; } = string.Empty;
     public string FullName { get; private set; } = string.Empty;
+    public string PasswordHash { get; private set; } = string.Empty;
+    public string Role { get; private set; } = string.Empty;
     public bool IsActive { get; private set; } = true;
     public DateTime? LastLoginAt { get; private set; }
 
@@ -14,14 +16,16 @@ public sealed class User : Entity
     {
     }
 
-    private User(Guid tenantId, string email, string fullName)
+    private User(Guid tenantId, string email, string fullName, string passwordHash, string role)
     {
         TenantId = tenantId;
         Email = email;
         FullName = fullName;
+        PasswordHash = passwordHash;
+        Role = role;
     }
 
-    internal static User Create(Guid tenantId, string email, string fullName)
+    public static User Create(Guid tenantId, string email, string fullName, string passwordHash, string role)
     {
         if (tenantId == Guid.Empty)
         {
@@ -38,7 +42,17 @@ public sealed class User : Entity
             throw new ArgumentException("Ad soyad zorunludur.", nameof(fullName));
         }
 
-        return new User(tenantId, email, fullName);
+        if (string.IsNullOrWhiteSpace(passwordHash))
+        {
+            throw new ArgumentException("PasswordHash zorunludur.", nameof(passwordHash));
+        }
+
+        if (string.IsNullOrWhiteSpace(role))
+        {
+            throw new ArgumentException("Role zorunludur.", nameof(role));
+        }
+
+        return new User(tenantId, email, fullName, passwordHash, role.Trim().ToUpperInvariant());
     }
 
     public void RecordLogin()
@@ -56,5 +70,10 @@ public sealed class User : Entity
 
         IsActive = false;
         MarkAsModified();
+    }
+
+    public bool HasPasswordHash(string passwordHash)
+    {
+        return string.Equals(PasswordHash, passwordHash, StringComparison.Ordinal);
     }
 }

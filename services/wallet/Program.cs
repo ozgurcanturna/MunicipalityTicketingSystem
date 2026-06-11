@@ -1,4 +1,8 @@
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SharedKernel.Infrastructure.DependencyInjection;
 using SharedKernel.Infrastructure.MultiTenancy;
 using Ticketing.Wallet.Api.Application.Contracts;
@@ -13,6 +17,33 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddHttpContextAccessor();
 
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "MunicipalityTicketing.Identity";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "MunicipalityTicketing.Clients";
+var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] ?? "super-secret-development-key-change-me-12345";
+
+builder.Services
+	.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+	.AddJwtBearer(options =>
+	{
+		options.TokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuer = true,
+			ValidateAudience = true,
+			ValidateIssuerSigningKey = true,
+			ValidateLifetime = true,
+			ValidIssuer = jwtIssuer,
+			ValidAudience = jwtAudience,
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
+			ClockSkew = TimeSpan.FromMinutes(1)
+		};
+	});
+
+builder.Services.AddAuthorization(options =>
+{
+	options.AddPolicy("WalletAdmin", policy => policy.RequireRole("ADMIN"));
+	options.AddPolicy("WalletUser", policy => policy.RequireRole("ADMIN", "USER"));
+});
+
 builder.Services.AddScoped<ITenantProvider, HttpHeaderTenantProvider>();
 builder.Services.AddSharedInfrastructure<WalletDbContext>(builder.Configuration);
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
@@ -23,6 +54,8 @@ if (app.Environment.IsDevelopment())
 {
 	app.MapOpenApi();
 }
+
+app.UseAuthentication();
 
 app.Use(async (context, next) =>
 {
@@ -43,8 +76,28 @@ app.Use(async (context, next) =>
 		return;
 	}
 
+	if (!context.User.Identity?.IsAuthenticated ?? true)
+	{
+		context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+		return;
+	}
+
+	var tenantHeader = tenantIdValues.FirstOrDefault()?.Trim();
+	var tenantClaim = context.User.FindFirstValue("tenant_id");
+	if (!string.Equals(tenantHeader, tenantClaim, StringComparison.OrdinalIgnoreCase))
+	{
+		context.Response.StatusCode = StatusCodes.Status403Forbidden;
+		await context.Response.WriteAsJsonAsync(new
+		{
+			message = "Token tenant bilgisi ile X-Tenant-Id uyusmuyor."
+		});
+		return;
+	}
+
 	await next();
 });
+
+app.UseAuthorization();
 
 app.MapGet("/", () => "Ticketing Wallet API is running");
 
@@ -64,7 +117,7 @@ app.MapPost("/wallets", async (
 	await walletRepository.SaveChangesAsync(cancellationToken);
 
 	return Results.Created($"/wallets/{wallet.Id}", WalletResponse.FromDomain(wallet));
-});
+}).RequireAuthorization("WalletAdmin");
 
 app.MapGet("/wallets/{id:guid}", async (
 	Guid id,
@@ -73,7 +126,7 @@ app.MapGet("/wallets/{id:guid}", async (
 {
 	var wallet = await walletRepository.GetByIdAsync(id, cancellationToken);
 	return wallet is null ? Results.NotFound() : Results.Ok(WalletResponse.FromDomain(wallet));
-});
+}).RequireAuthorization("WalletUser");
 
 app.MapPost("/wallets/{id:guid}/topups", async (
 	Guid id,
@@ -92,7 +145,7 @@ app.MapPost("/wallets/{id:guid}/topups", async (
 	await walletRepository.SaveChangesAsync(cancellationToken);
 
 	return Results.Ok(WalletResponse.FromDomain(wallet));
-});
+}).RequireAuthorization("WalletAdmin");
 
 app.MapPost("/wallets/{id:guid}/spend", async (
 	Guid id,
@@ -119,7 +172,7 @@ app.MapPost("/wallets/{id:guid}/spend", async (
 	await walletRepository.SaveChangesAsync(cancellationToken);
 
 	return Results.Ok(WalletResponse.FromDomain(wallet));
-});
+}).RequireAuthorization("WalletUser");
 
 app.MapGet("/wallets/{id:guid}/transactions", async (
 	Guid id,
@@ -137,6 +190,6 @@ app.MapGet("/wallets/{id:guid}/transactions", async (
 		.ToArray();
 
 	return Results.Ok(transactions);
-});
+}).RequireAuthorization("WalletUser");
 
 app.Run();

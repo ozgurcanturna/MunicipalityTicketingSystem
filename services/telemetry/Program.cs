@@ -1,3 +1,7 @@
+using System.Security.Claims;
+using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using SharedKernel.Infrastructure.DependencyInjection;
 using SharedKernel.Infrastructure.MultiTenancy;
 using Journey.Telemetry.Api.Application.Contracts;
@@ -12,6 +16,33 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddOpenApi();
 builder.Services.AddHttpContextAccessor();
 
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "MunicipalityTicketing.Identity";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "MunicipalityTicketing.Clients";
+var jwtSecretKey = builder.Configuration["Jwt:SecretKey"] ?? "super-secret-development-key-change-me-12345";
+
+builder.Services
+	.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+	.AddJwtBearer(options =>
+	{
+		options.TokenValidationParameters = new TokenValidationParameters
+		{
+			ValidateIssuer = true,
+			ValidateAudience = true,
+			ValidateIssuerSigningKey = true,
+			ValidateLifetime = true,
+			ValidIssuer = jwtIssuer,
+			ValidAudience = jwtAudience,
+			IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecretKey)),
+			ClockSkew = TimeSpan.FromMinutes(1)
+		};
+	});
+
+builder.Services.AddAuthorization(options =>
+{
+	options.AddPolicy("TelemetryOperator", policy => policy.RequireRole("ADMIN", "OPERATOR"));
+	options.AddPolicy("TelemetryReader", policy => policy.RequireRole("ADMIN", "OPERATOR", "USER"));
+});
+
 builder.Services.AddScoped<ITenantProvider, HttpHeaderTenantProvider>();
 builder.Services.AddSharedInfrastructure<TelemetryDbContext>(builder.Configuration);
 builder.Services.AddScoped<IJourneyRepository, JourneyRepository>();
@@ -22,6 +53,8 @@ if (app.Environment.IsDevelopment())
 {
 	app.MapOpenApi();
 }
+
+app.UseAuthentication();
 
 app.Use(async (context, next) =>
 {
@@ -42,8 +75,28 @@ app.Use(async (context, next) =>
 		return;
 	}
 
+	if (!context.User.Identity?.IsAuthenticated ?? true)
+	{
+		context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+		return;
+	}
+
+	var tenantHeader = tenantIdValues.FirstOrDefault()?.Trim();
+	var tenantClaim = context.User.FindFirstValue("tenant_id");
+	if (!string.Equals(tenantHeader, tenantClaim, StringComparison.OrdinalIgnoreCase))
+	{
+		context.Response.StatusCode = StatusCodes.Status403Forbidden;
+		await context.Response.WriteAsJsonAsync(new
+		{
+			message = "Token tenant bilgisi ile X-Tenant-Id uyusmuyor."
+		});
+		return;
+	}
+
 	await next();
 });
+
+app.UseAuthorization();
 
 app.MapGet("/", () => "Journey Telemetry API is running");
 
@@ -69,7 +122,7 @@ app.MapPost("/journeys/start", async (
 	await journeyRepository.SaveChangesAsync(cancellationToken);
 
 	return Results.Created($"/journeys/{journey.Id}", JourneySessionResponse.FromDomain(journey));
-});
+}).RequireAuthorization("TelemetryOperator");
 
 app.MapPost("/journeys/{id:guid}/locations", async (
 	Guid id,
@@ -88,7 +141,7 @@ app.MapPost("/journeys/{id:guid}/locations", async (
 	await journeyRepository.SaveChangesAsync(cancellationToken);
 
 	return Results.Ok(JourneySessionResponse.FromDomain(journey));
-});
+}).RequireAuthorization("TelemetryOperator");
 
 app.MapPost("/journeys/{id:guid}/checkin", async (
 	Guid id,
@@ -107,7 +160,7 @@ app.MapPost("/journeys/{id:guid}/checkin", async (
 	await journeyRepository.SaveChangesAsync(cancellationToken);
 
 	return Results.Ok(JourneySessionResponse.FromDomain(journey));
-});
+}).RequireAuthorization("TelemetryOperator");
 
 app.MapPost("/journeys/{id:guid}/checkout", async (
 	Guid id,
@@ -126,7 +179,7 @@ app.MapPost("/journeys/{id:guid}/checkout", async (
 	await journeyRepository.SaveChangesAsync(cancellationToken);
 
 	return Results.Ok(JourneySessionResponse.FromDomain(journey));
-});
+}).RequireAuthorization("TelemetryOperator");
 
 app.MapPost("/journeys/{id:guid}/complete", async (
 	Guid id,
@@ -144,7 +197,7 @@ app.MapPost("/journeys/{id:guid}/complete", async (
 	await journeyRepository.SaveChangesAsync(cancellationToken);
 
 	return Results.Ok(JourneySessionResponse.FromDomain(journey));
-});
+}).RequireAuthorization("TelemetryOperator");
 
 app.MapGet("/journeys/{id:guid}", async (
 	Guid id,
@@ -153,7 +206,7 @@ app.MapGet("/journeys/{id:guid}", async (
 {
 	var journey = await journeyRepository.GetByIdAsync(id, cancellationToken);
 	return journey is null ? Results.NotFound() : Results.Ok(JourneySessionResponse.FromDomain(journey));
-});
+}).RequireAuthorization("TelemetryReader");
 
 app.MapGet("/journeys/active/{vehicleId}", async (
 	string vehicleId,
@@ -162,6 +215,6 @@ app.MapGet("/journeys/active/{vehicleId}", async (
 {
 	var journey = await journeyRepository.GetActiveByVehicleIdAsync(vehicleId.Trim(), cancellationToken);
 	return journey is null ? Results.NotFound() : Results.Ok(JourneySessionResponse.FromDomain(journey));
-});
+}).RequireAuthorization("TelemetryReader");
 
 app.Run();

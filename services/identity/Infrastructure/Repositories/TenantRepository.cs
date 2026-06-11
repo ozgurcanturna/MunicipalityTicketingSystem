@@ -30,4 +30,14 @@ public sealed class TenantRepository : Repository<MunicipalityTenant>, ITenantRe
                 tenant => tenant.Name == name,
                 cancellationToken);
     }
+
+    public Task<MunicipalityTenant?> GetByUserEmailAsync(Guid tenantId, string email, CancellationToken cancellationToken = default)
+    {
+        return IdentityDbContext.Tenants
+            .Include(tenant => tenant.Users)
+            .FirstOrDefaultAsync(
+                tenant => tenant.Id == tenantId
+                    && tenant.Users.Any(user => user.Email == email),
+                cancellationToken);
+    }
 }

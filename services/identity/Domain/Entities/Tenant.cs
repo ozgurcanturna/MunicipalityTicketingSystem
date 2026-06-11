@@ -30,7 +30,7 @@ public sealed class MunicipalityTenant : AggregateRoot
         return new MunicipalityTenant(name);
     }
 
-    public User AddUser(string email, string fullName)
+    public User AddUser(string email, string fullName, string passwordHash, string role)
     {
         if (!IsActive)
         {
@@ -42,7 +42,7 @@ public sealed class MunicipalityTenant : AggregateRoot
             throw new InvalidOperationException("Bu e-posta ile kullanıcı zaten mevcut.");
         }
 
-        var user = User.Create(Id, email, fullName);
+        var user = User.Create(Id, email, fullName, passwordHash, role);
         _users.Add(user);
         RegisterUpdated();
 

@@ -91,14 +91,17 @@ graph TB
 Bu repo Step 01-11 icin teknik bir MVP akisi sunar. Ancak Step dokumanlarinda tanimlanan tum business/hedef gereksinimleri henuz tam olarak production seviyesinde tamamlanmamistir.
 
 ### Su an kodda bulunanlar
+
 - Shared Kernel + EF Core + Redis tabanli altyapi
 - Identity/Wallet/Telemetry minimal endpointleri ve temel domain kurallari
+- Identity bootstrap + JWT login + rol bazli endpoint korumalari
 - Event processor (in-memory queue, retry, dead-letter, idempotency)
 - YARP gateway routing + tenant header zorunlulugu + basic rate limit
 - Unit ve integration testlerin temel kapsami
 - Docker compose ile lokal ortam kurulumu
 
 ### Henuz eksik veya kismi kalan kritik hedefler
+
 - JWT authentication ve RBAC (FR-001) tam uygulanmadi
 - Bilet yonetimi (FR-003: QR, iade/iptal, ticket lifecycle) ayri bir servis olarak uygulanmadi
 - Brighter/Darker gercek mesajlasma entegrasyonu yerine worker tarafinda in-memory queue kullaniliyor
@@ -165,6 +168,7 @@ MunicipalityTicketing/
 | [docs/Step-09-Testing.md](docs/Step-09-Testing.md) | Unit ve integration test adımları |
 | [docs/Step-10-SimulationClients.md](docs/Step-10-SimulationClients.md) | Simulator ile gateway uzerinden yuk testi adımları |
 | [docs/Step-11-DockerDeployment.md](docs/Step-11-DockerDeployment.md) | Docker compose kurulumu ve event bus deployment adımları |
+| [docs/Step-12-AuthAndRbac.md](docs/Step-12-AuthAndRbac.md) | JWT authentication, rol tabanli yetkilendirme ve tenant-claim eslestirme |
 
 ---
 
@@ -217,6 +221,7 @@ Proje tamamlandığında simulation client'ları ile aşağıdaki senaryolar tes
 | 09 | Testing | ✅ MVP Tamamlandı |
 | 10 | Simulation Clients | ✅ MVP Tamamlandı |
 | 11 | Docker & Deployment | ✅ MVP Tamamlandı |
+| 12 | JWT Authentication & RBAC | ✅ MVP Tamamlandı |
 
 ---
 

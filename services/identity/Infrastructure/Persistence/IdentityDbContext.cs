@@ -38,6 +38,8 @@ public sealed class IdentityDbContext : AppDbContext
             entity.HasKey(user => user.Id);
             entity.Property(user => user.Email).HasMaxLength(320).IsRequired();
             entity.Property(user => user.FullName).HasMaxLength(200).IsRequired();
+            entity.Property(user => user.PasswordHash).HasMaxLength(512).IsRequired();
+            entity.Property(user => user.Role).HasMaxLength(50).IsRequired();
             entity.HasIndex(user => new { user.TenantId, user.Email }).IsUnique();
         });
     }
