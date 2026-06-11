@@ -103,28 +103,29 @@ public record TicketPurchasedEvent(Guid TicketId, Guid UserId, decimal Amount);
 
 ### Project Structure
 ```
-src/
-├── SharedKernel/
-│   ├── Domain/          # Base classes, interfaces
-│   ├── Infrastructure/  # EF Core, Redis, etc.
-│   └── Application/     # CQRS handlers, validators
-├── Tenants.Identity.Api/
-├── Ticketing.Wallet.Api/
-├── Journey.Telemetry.Api/
-├── Journey.EventProcessor.Worker/
-├── ApiGateway.Yarp/
-└── Clients/
-    └── Simulation/      # Load testing clients
-
-tests/
-├── MunicipalityTicketing.UnitTests/
-└── MunicipalityTicketing.IntegrationTests/
-
-docs/
-├── skills.md
-├── Step-00-Planlama.md
-├── Step-01-InitialSetup.md
-└── Step-XX-*.md
+MunicipalityTicketing/
+├── core/                      # Shared Kernel
+│   ├── SharedKernel.Domain/   # Base classes, interfaces
+│   └── SharedKernel.Infrastructure/  # EF Core, Redis, etc.
+├── services/                  # Microservices
+│   ├── identity/              # Tenant.Identity.Api
+│   ├── wallet/                # Ticketing.Wallet.Api
+│   └── telemetry/             # Journey.Telemetry.Api
+├── workers/                   # Background Workers
+│   └── event-processor/       # Journey.EventProcessor.Worker
+├── gateway/                   # API Gateway
+│   └── ApiGateway.Yarp/
+├── tools/                     # Development Tools
+│   └── simulator/             # Load testing clients
+├── tests/
+│   ├── MunicipalityTicketing.UnitTests/
+│   └── MunicipalityTicketing.IntegrationTests/
+├── docs/
+│   ├── skills.md
+│   ├── Step-00-Planlama.md
+│   ├── Step-01-InitialSetup.md
+│   └── Step-XX-*.md
+└── README.md
 ```
 
 ### Error Handling

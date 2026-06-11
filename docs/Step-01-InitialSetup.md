@@ -10,8 +10,8 @@ Template projelerden gelen gereksiz kodları temizleyip, solution'ı build edile
 ### 1. Gereksiz Dosyaların Silinmesi
 ```bash
 # Template Class1.cs dosyaları silindi
-rm src/SharedKernel.Domain/Class1.cs
-rm src/SharedKernel.Infrastructure/Class1.cs
+rm core/SharedKernel.Domain/Class1.cs
+rm core/SharedKernel.Infrastructure/Class1.cs
 ```
 
 ### 2. Program.cs Dosyalarının Temizlenmesi
@@ -63,7 +63,7 @@ Worker template zaten temiz idi, değişiklik yapılmadı.
 ### 3. Dizin Yapısının Oluşturulması
 ```bash
 # Simulation clients için dizin
-mkdir -p src/Clients/Simulation
+mkdir -p tools/simulator
 
 # Test projeleri için dizinler
 mkdir -p tests/MunicipalityTicketing.UnitTests
@@ -76,14 +76,15 @@ mkdir -p tests/MunicipalityTicketing.IntegrationTests
 
 ### Solution Dosyası
 - **Dosya**: `MunicipalityTicketing.slnx`
-- **Projeler**: 7 adet
-  - SharedKernel.Domain (src/BuildingBlocks/SharedKernel/)
-  - SharedKernel.Infrastructure (src/BuildingBlocks/SharedKernel/)
-  - Tenant.Identity.Api
-  - Ticketing.Wallet.Api
-  - Journey.Telemetry.Api
-  - Journey.EventProcessor.Worker
-  - ApiGateway.Yarp
+- **Projeler**: 8 adet
+  - SharedKernel.Domain (core/)
+  - SharedKernel.Infrastructure (core/)
+  - Tenant.Identity.Api (services/identity/)
+  - Ticketing.Wallet.Api (services/wallet/)
+  - Journey.Telemetry.Api (services/telemetry/)
+  - Journey.EventProcessor.Worker (workers/event-processor/)
+  - ApiGateway.Yarp (gateway/)
+  - MunicipalityTicketing.Simulator (tools/simulator/)
 
 ### Target Framework
 - Tüm projeler: **.NET 10.0**
@@ -91,33 +92,34 @@ mkdir -p tests/MunicipalityTicketing.IntegrationTests
 ### Proje Yapısı
 ```
 MunicipalityTicketing/
-├── src/
-│   ├── BuildingBlocks/
-│   │   └── SharedKernel/
-│   │       ├── SharedKernel.Domain/
-│   │       │   ├── Entities/
-│   │       │   │   ├── Entity.cs
-│   │       │   │   └── AggregateRoot.cs
-│   │       │   ├── Common/
-│   │       │   │   └── ValueObject.cs
-│   │       │   ├── Events/
-│   │       │   │   └── DomainEvent.cs
-│   │       │   ├── Repositories/
-│   │       │   │   └── IRepository.cs
-│   │       │   └── SharedKernel.Domain.csproj
-│   │       └── SharedKernel.Infrastructure/
-│   │           ├── Persistence/
-│   │           │   └── AppDbContext.cs
-│   │           ├── Repositories/
-│   │           │   └── Repository.cs
-│   │           └── SharedKernel.Infrastructure.csproj
-│   ├── Tenants.Identity.Api/ ✅ Temiz
-│   ├── Ticketing.Wallet.Api/ ✅ Temiz
-│   ├── Journey.Telemetry.Api/✅ Temiz
-│   ├── Journey.EventProcessor.Worker/ ✅ Temiz
-│   ├── ApiGateway.Yarp/      ✅ Temiz
-│   └── Clients/
-│       └── Simulation/       📁 Yeni oluşturuldu
+├── core/
+│   ├── SharedKernel.Domain/
+│   │   ├── Entities/
+│   │   │   ├── Entity.cs
+│   │   │   └── AggregateRoot.cs
+│   │   ├── Common/
+│   │   │   └── ValueObject.cs
+│   │   ├── Events/
+│   │   │   └── DomainEvent.cs
+│   │   ├── Repositories/
+│   │   │   └── IRepository.cs
+│   │   └── SharedKernel.Domain.csproj
+│   └── SharedKernel.Infrastructure/
+│       ├── Persistence/
+│       │   └── AppDbContext.cs
+│       ├── Repositories/
+│       │   └── Repository.cs
+│       └── SharedKernel.Infrastructure.csproj
+├── services/
+│   ├── identity/              ✅ Temiz
+│   ├── wallet/                ✅ Temiz
+│   └── telemetry/             ✅ Temiz
+├── workers/
+│   └── event-processor/       ✅ Temiz
+├── gateway/
+│   └── ApiGateway.Yarp/       ✅ Temiz
+├── tools/
+│   └── simulator/             📁 Yeni oluşturuldu
 ├── tests/
 │   ├── MunicipalityTicketing.UnitTests/ 📁 Yeni oluşturuldu
 │   └── MunicipalityTicketing.IntegrationTests/ 📁 Yeni oluşturuldu
