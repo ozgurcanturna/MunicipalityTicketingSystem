@@ -1,0 +1,188 @@
+# Municipality Ticketing System
+
+## 🚌 Proje Açıklaması
+
+Belediyeler için geliştirilen yüksek ölçeklenebilir, multi-tenant otobüs biletleme sistemi. Bu proje, 15 kişilik hayali bir yazılım ekibinin proje lideri tarafından, DDD (Domain-Driven Design) prensipleri ve mikroservis mimarisi kullanılarak geliştirilmektedir.
+
+### Senaryo
+- **İlk Müşteriler**: 4 belediye
+- **Performans Hedefi** (her belediye için):
+  - 10 milyon+ günlük aktif bilet kullanımı
+  - 100.000+ günlük bilet/kredi satın alma
+  - 10.000+ günlük otobüs yolculuğu takibi
+- **Kritik Gereksinimler**: Multi-tenancy, fault isolation, zero-downtime deployment
+
+---
+
+## 🏗️ Mimari
+
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        Mobile[Mobile App]
+        Web[Web Dashboard]
+        Simulator[Simulation Client]
+    end
+
+    subgraph "API Gateway"
+        YARP[YARP API Gateway]
+    end
+
+    subgraph "Microservices"
+        Identity[Tenant.Identity.Api]
+        Wallet[Ticketing.Wallet.Api]
+        Telemetry[Journey.Telemetry.Api]
+        EventProc[Journey.EventProcessor.Worker]
+    end
+
+    subgraph "Infrastructure"
+        Redis[Redis Cache]
+        MessageBus[Brighter/Darker]
+        OTel[OpenTelemetry]
+    end
+
+    subgraph "Data Stores (Per Tenant)"
+        DB1[(Tenant A DB)]
+        DB2[(Tenant B DB)]
+        DB3[(Tenant C DB)]
+        DB4[(Tenant D DB)]
+    end
+
+    Mobile --> YARP
+    Web --> YARP
+    Simulator --> YARP
+    YARP --> Identity
+    YARP --> Wallet
+    YARP --> Telemetry
+    Identity --> Redis
+    Wallet --> Redis
+    Telemetry --> Redis
+    Identity --> MessageBus
+    Wallet --> MessageBus
+    Telemetry --> MessageBus
+    MessageBus --> EventProc
+    Identity --> DB1 & DB2 & DB3 & DB4
+    Wallet --> DB1 & DB2 & DB3 & DB4
+    Telemetry --> DB1 & DB2 & DB3 & DB4
+    EventProc --> DB1 & DB2 & DB3 & DB4
+```
+
+---
+
+## 🛠️ Teknolojiler
+
+| Kategori | Araç | Lisans |
+|----------|------|--------|
+| Framework | .NET 10 | MIT |
+| Message Bus | Brighter & Darker | Apache 2.0 |
+| ORM | Entity Framework Core 10 | MIT |
+| Cache | StackExchange.Redis | MIT |
+| Validation | FluentValidation | Apache 2.0 |
+| Logging | Serilog | Apache 2.0 |
+| Tracing | OpenTelemetry | Apache 2.0 |
+| API Gateway | YARP | MIT |
+| Testing | xUnit, Moq, Shouldly | Various |
+| Container | Docker | Apache 2.0 |
+
+---
+
+## 📁 Proje Yapısı
+
+```
+MunicipalityTicketing/
+├── src/
+│   ├── SharedKernel/              # Domain, Infrastructure, Application
+│   ├── Tenants.Identity.Api       # Kullanıcı yönetimi
+│   ├── Ticketing.Wallet.Api       # Cüzdan ve ödeme işlemleri
+│   ├── Journey.Telemetry.Api      # Yolculuk takibi
+│   ├── Journey.EventProcessor.Worker  # Asenkron event processing
+│   ├── ApiGateway.Yarp            # API Gateway
+│   └── Clients/Simulation         # Load testing clients
+├── tests/
+│   ├── MunicipalityTicketing.UnitTests
+│   └── MunicipalityTicketing.IntegrationTests
+├── docs/
+│   ├── skills.md                  # Developer guidelines
+│   ├── Step-00-Planlama.md        # Requirements & architecture
+│   ├── Step-01-InitialSetup.md    # Initial setup steps
+│   └── Step-XX-*.md               # Diğer adımlar
+├── docker-compose.yml
+└── README.md
+```
+
+---
+
+## 📋 Dokümantasyon
+
+| Dosya | Açıklama |
+|-------|----------|
+| [docs/skills.md](docs/skills.md) | Developer becerileri ve kodlama standartları |
+| [docs/Step-00-Planlama.md](docs/Step-00-Planlama.md) | İş gereksinimleri, mimari, tool set |
+| [docs/Step-01-InitialSetup.md](docs/Step-01-InitialSetup.md) | Proje kurulumu ve temizlik adımları |
+
+---
+
+## 🚀 Başlangıç
+
+### Gereksinimler
+- .NET 10 SDK
+- Docker & Docker Compose
+- Git
+
+### Kurulum (Yakında)
+```bash
+# Clone repository
+git clone <repo-url>
+cd MunicipalityTicketing
+
+# Build solution
+dotnet build
+
+# Run with Docker Compose
+docker-compose up -d
+```
+
+---
+
+## 🧪 Test Senaryoları
+
+Proje tamamlandığında simulation client'ları ile aşağıdaki senaryolar test edilecek:
+
+1. **Load Testing**: 10M+ daily transactions
+2. **Failure Scenarios**: Database failures, message bus downtime
+3. **Multi-Tenant Isolation**: Cross-tenant data access prevention
+4. **Zero-Downtime Updates**: Rolling deployment validation
+
+---
+
+## 📝 Geliştirme Adımları
+
+| Step | Konu | Durum |
+|------|------|-------|
+| 00 | Planlama ve Gereksinimler | ✅ Tamamlandı |
+| 01 | Initial Setup - Template Temizliği | ✅ Tamamlandı |
+| 02 | Shared Kernel - Domain Base Classes | 📝 Planlandı |
+| 03 | Infrastructure - EF Core & Redis | 📝 Planlandı |
+| 04 | Identity Service | 📝 Planlandı |
+| 05 | Wallet Service | 📝 Planlandı |
+| 06 | Telemetry Service | 📝 Planlandı |
+| 07 | Event Processor | 📝 Planlandı |
+| 08 | API Gateway | 📝 Planlandı |
+| 09 | Testing | 📝 Planlandı |
+| 10 | Simulation Clients | 📝 Planlandı |
+| 11 | Docker & Deployment | 📝 Planlandı |
+
+---
+
+## 👨‍💻 Proje Lideri
+
+**Özgür Can TURNA**  
+*Proje Lideri ve Tek Geliştirici (Simülasyon)*
+
+Bu proje, gerçek bir 15 kişilik ekip çalışmasını simüle etmek amacıyla DDD ve mikroservis best practice'lerini uygulamak için oluşturulmuştur.
+
+---
+
+## 📄 Lisans
+
+MIT License - Detaylar için LICENSE dosyasına bakınız.
