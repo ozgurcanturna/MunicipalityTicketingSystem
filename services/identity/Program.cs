@@ -24,6 +24,28 @@ if (app.Environment.IsDevelopment())
 	app.MapOpenApi();
 }
 
+app.Use(async (context, next) =>
+{
+	if (context.Request.Path == "/" || context.Request.Path.StartsWithSegments("/openapi"))
+	{
+		await next();
+		return;
+	}
+
+	if (!context.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantIdValues)
+		|| string.IsNullOrWhiteSpace(tenantIdValues.FirstOrDefault()))
+	{
+		context.Response.StatusCode = StatusCodes.Status400BadRequest;
+		await context.Response.WriteAsJsonAsync(new
+		{
+			message = "X-Tenant-Id header zorunludur."
+		});
+		return;
+	}
+
+	await next();
+});
+
 app.MapGet("/", () => "Tenant Identity API is running");
 
 app.MapPost("/tenants", async (

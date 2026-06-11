@@ -85,6 +85,10 @@ Dosya: services/wallet/Infrastructure/MultiTenancy/HttpHeaderTenantProvider.cs
 
 X-Tenant-Id header değerini okuyup ITenantProvider sözleşmesini doldurur.
 
+Güncel davranış:
+- Wallet API katmanında X-Tenant-Id header zorunludur.
+- Header eksik ise servis 400 BadRequest döner.
+
 ---
 
 ## 5) API Sözleşmeleri ve Endpointler
@@ -134,6 +138,7 @@ Beklenen sonuç: tüm build/test adımları başarılı.
 - [x] IWalletRepository ve WalletRepository eklendi.
 - [x] Wallet API endpointleri eklendi.
 - [x] Multi-tenant provider eklendi.
+- [x] Wallet API için X-Tenant-Id zorunluluğu middleware ile eklendi.
 - [x] Build ve test doğrulaması yapıldı.
 
 ---

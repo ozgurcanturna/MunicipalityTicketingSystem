@@ -80,9 +80,10 @@ Dosya: services/identity/Infrastructure/MultiTenancy/HttpHeaderTenantProvider.cs
 
 X-Tenant-Id header değerini okuyarak SharedKernel Infrastructure içindeki ITenantProvider sözleşmesini doldurur.
 
-Fallback davranışı:
-- Header yoksa null döner
-- null durumda Default connection string kullanılır
+Güncel davranış:
+- API katmanında (Program.cs middleware) X-Tenant-Id zorunludur.
+- Header yoksa servis 400 BadRequest döner.
+- Provider null dönebilse de bu durum HTTP isteklerinde middleware tarafından engellenir.
 
 ---
 
@@ -136,6 +137,7 @@ Beklenen sonuç: build ve test adımları başarılı.
 - [x] IdentityDbContext eklendi.
 - [x] ITenantRepository ve TenantRepository eklendi.
 - [x] HttpHeaderTenantProvider eklendi.
+- [x] Identity API için X-Tenant-Id zorunluluğu middleware ile eklendi.
 - [x] Identity Program.cs DI ve endpointlerle güncellendi.
 - [x] Request/response sözleşmeleri eklendi.
 - [x] Build ve test doğrulandı.

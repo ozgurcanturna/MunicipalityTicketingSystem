@@ -23,6 +23,28 @@ if (app.Environment.IsDevelopment())
 	app.MapOpenApi();
 }
 
+app.Use(async (context, next) =>
+{
+	if (context.Request.Path == "/" || context.Request.Path.StartsWithSegments("/openapi"))
+	{
+		await next();
+		return;
+	}
+
+	if (!context.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantIdValues)
+		|| string.IsNullOrWhiteSpace(tenantIdValues.FirstOrDefault()))
+	{
+		context.Response.StatusCode = StatusCodes.Status400BadRequest;
+		await context.Response.WriteAsJsonAsync(new
+		{
+			message = "X-Tenant-Id header zorunludur."
+		});
+		return;
+	}
+
+	await next();
+});
+
 app.MapGet("/", () => "Journey Telemetry API is running");
 
 app.MapPost("/journeys/start", async (

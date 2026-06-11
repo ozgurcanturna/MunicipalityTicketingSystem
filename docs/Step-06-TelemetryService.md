@@ -83,6 +83,10 @@ Dosya: services/telemetry/Infrastructure/MultiTenancy/HttpHeaderTenantProvider.c
 
 X-Tenant-Id header bilgisini okuyup ITenantProvider sözleşmesine map eder.
 
+Güncel davranış:
+- Telemetry API katmanında X-Tenant-Id header zorunludur.
+- Header eksik ise servis 400 BadRequest döner.
+
 ---
 
 ## 5) API Sözleşmeleri ve Endpointler
@@ -134,6 +138,7 @@ Beklenen sonuç: tüm build/test adımları başarılı.
 - [x] TelemetryDbContext eklendi.
 - [x] IJourneyRepository ve JourneyRepository eklendi.
 - [x] Multi-tenant provider eklendi.
+- [x] Telemetry API için X-Tenant-Id zorunluluğu middleware ile eklendi.
 - [x] Telemetry endpointleri eklendi.
 - [x] Build/test doğrulaması tamamlandı.
 

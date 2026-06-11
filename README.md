@@ -86,6 +86,29 @@ graph TB
 
 ---
 
+## 📌 Kapsam Gerceklik Durumu (MVP vs Hedef)
+
+Bu repo Step 01-11 icin teknik bir MVP akisi sunar. Ancak Step dokumanlarinda tanimlanan tum business/hedef gereksinimleri henuz tam olarak production seviyesinde tamamlanmamistir.
+
+### Su an kodda bulunanlar
+- Shared Kernel + EF Core + Redis tabanli altyapi
+- Identity/Wallet/Telemetry minimal endpointleri ve temel domain kurallari
+- Event processor (in-memory queue, retry, dead-letter, idempotency)
+- YARP gateway routing + tenant header zorunlulugu + basic rate limit
+- Unit ve integration testlerin temel kapsami
+- Docker compose ile lokal ortam kurulumu
+
+### Henuz eksik veya kismi kalan kritik hedefler
+- JWT authentication ve RBAC (FR-001) tam uygulanmadi
+- Bilet yonetimi (FR-003: QR, iade/iptal, ticket lifecycle) ayri bir servis olarak uygulanmadi
+- Brighter/Darker gercek mesajlasma entegrasyonu yerine worker tarafinda in-memory queue kullaniliyor
+- Serilog/OpenTelemetry/Prometheus/Grafana gozlemlenebilirlik zinciri tam entegre degil
+- CI/CD, zero-downtime deployment ve feature flag gibi operasyonel hedefler dokumante ama kod/pipeline seviyesinde tam uygulanmadi
+
+Not: Step durumlarinin "tamamlandi" olmasi, adim bazli MVP tesliminin tamamlandigini ifade eder; tum BR/FR/NFR hedeflerinin production-hardening seviyesinde bittiği anlamina gelmez.
+
+---
+
 ## 📁 Proje Yapısı
 
 ```
@@ -183,17 +206,17 @@ Proje tamamlandığında simulation client'ları ile aşağıdaki senaryolar tes
 | Step | Konu | Durum |
 |------|------|-------|
 | 00 | Planlama ve Gereksinimler | ✅ Tamamlandı |
-| 01 | Initial Setup - Template Temizliği | ✅ Tamamlandı |
-| 02 | Shared Kernel - Domain Base Classes | ✅ Tamamlandı |
-| 03 | Infrastructure - EF Core & Redis | ✅ Tamamlandı |
-| 04 | Identity Service | ✅ Tamamlandı |
-| 05 | Wallet Service | ✅ Tamamlandı |
-| 06 | Telemetry Service | ✅ Tamamlandı |
-| 07 | Event Processor | ✅ Tamamlandı |
-| 08 | API Gateway | ✅ Tamamlandı |
-| 09 | Testing | ✅ Tamamlandı |
-| 10 | Simulation Clients | ✅ Tamamlandı |
-| 11 | Docker & Deployment | ✅ Tamamlandı |
+| 01 | Initial Setup - Template Temizliği | ✅ MVP Tamamlandı |
+| 02 | Shared Kernel - Domain Base Classes | ✅ MVP Tamamlandı |
+| 03 | Infrastructure - EF Core & Redis | ✅ MVP Tamamlandı |
+| 04 | Identity Service | ✅ MVP Tamamlandı |
+| 05 | Wallet Service | ✅ MVP Tamamlandı |
+| 06 | Telemetry Service | ✅ MVP Tamamlandı |
+| 07 | Event Processor | ✅ MVP Tamamlandı |
+| 08 | API Gateway | ✅ MVP Tamamlandı |
+| 09 | Testing | ✅ MVP Tamamlandı |
+| 10 | Simulation Clients | ✅ MVP Tamamlandı |
+| 11 | Docker & Deployment | ✅ MVP Tamamlandı |
 
 ---
 
