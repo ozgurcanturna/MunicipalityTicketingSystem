@@ -8,8 +8,4 @@
     <OutputType>Exe</OutputType>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="System.Net.Http.Json" Version="9.0.0" />
-  </ItemGroup>
-
 </Project>
