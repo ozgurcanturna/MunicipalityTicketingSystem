@@ -1,52 +1,86 @@
 ```
-# Build artifacts
-bin/
-obj/
-*.dll
-*.exe
-*.pdb
-*.so
-*.dylib
-*.jar
-*.war
-*.class
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Dd]eploy/
+[Bb]uild/
+[Bb]in/
+[Oo]bj/
 
-# Dependencies
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.cs.cache
+*.csproj.user
+*.vbproj.user
+*.fsproj.user
+*.userosscache
+
+# IDE - Visual Studio Code
+.vscode/
+
+# IDE - Visual Studio
+.vs/
+*.VC.db
+*.VC.VC.opendb
+
+# NuGet Packages
+*.nupkg
+*.snupkg
 packages/
-node_modules/
-venv/
-.venv/
+NuGet.Config
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Configuration files
+appsettings.Development.json
+appsettings.Production.json
+
+# Local configuration files
+*.local
+*.local.json
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+
+# Environment specific
 .env
 .env.local
 .env.*
 
-# Logs
-*.log
+# Output of msbuild
+**/[Bb]in/
+**/[Oo]bj/
+**/[Dd]ebug*/
+**/[Rr]elease*/
 
-# IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# Publish folder
+**/publish/
 
-# OS
-.DS_Store
-Thumbs.db
+# Built web pages
+wwwroot/
 
-# Coverage
-coverage/
-htmlcov/
-.coverage
-
-# Distribution / packaging
-dist/
-build/
-*.tar.gz
-*.whl
-*.egg-info/
-
-# Testing
-*.pytest_cache/
-.mypy_cache/
+# Package manager cache directories
+.npm/
+.node_repl_history
+.yarn-integrity
+.yarn/cache/
+.yarn/unplugged/
+.pnpm-store/
 ```
