@@ -1,5 +1,40 @@
-```markdown
-# Documentation
-docs/
+```
+# Build artifacts
+bin/
+obj/
+out/
+*.dll
+*.exe
+*.pdb
+*.so
+*.dylib
+*.nupkg
 
+# Dependencies
+packages/
+node_modules/
+vendor/
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Test and coverage
+coverage/
+htmlcov/
+*.coverage
 ```

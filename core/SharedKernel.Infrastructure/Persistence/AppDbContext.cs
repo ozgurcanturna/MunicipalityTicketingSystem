@@ -24,13 +24,13 @@ public abstract class AppDbContext : DbContext
     private void UpdateAuditableEntities()
     {
         var now = DateTime.UtcNow;
-        var modifiedEntities = ChangeTracker.Entries<Entity>()
-            .Where(e => e.State == EntityState.Modified)
-            .Select(e => e.Entity);
-
-        foreach (var entity in modifiedEntities)
+        
+        foreach (var entry in ChangeTracker.Entries<Entity>())
         {
-            entity.GetType().GetProperty("UpdatedAt")?.SetValue(entity, now);
+            if (entry.State == EntityState.Modified)
+            {
+                entry.Property(e => e.UpdatedAt).CurrentValue = now;
+            }
         }
     }
 
