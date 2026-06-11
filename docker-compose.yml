@@ -1,0 +1,154 @@
+name: municipality-ticketing
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: municipality-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "Your_strong_password123!"
+    ports:
+      - "14333:1433"
+    networks:
+      - municipality-net
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/1433' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: municipality-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - municipality-net
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: municipality-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - municipality-net
+
+  identity:
+    build:
+      context: .
+      dockerfile: services/identity/Dockerfile
+    container_name: municipality-identity
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ASPNETCORE_URLS: http://+:8080
+    ports:
+      - "5115:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    networks:
+      - municipality-net
+
+  wallet:
+    build:
+      context: .
+      dockerfile: services/wallet/Dockerfile
+    container_name: municipality-wallet
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ASPNETCORE_URLS: http://+:8080
+    ports:
+      - "5136:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    networks:
+      - municipality-net
+
+  telemetry:
+    build:
+      context: .
+      dockerfile: services/telemetry/Dockerfile
+    container_name: municipality-telemetry
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ASPNETCORE_URLS: http://+:8080
+    ports:
+      - "5169:8080"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    networks:
+      - municipality-net
+
+  event-processor:
+    build:
+      context: .
+      dockerfile: workers/event-processor/Dockerfile
+    container_name: municipality-event-processor
+    environment:
+      DOTNET_ENVIRONMENT: Docker
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      rabbitmq:
+        condition: service_started
+    networks:
+      - municipality-net
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: municipality-gateway
+    environment:
+      ASPNETCORE_ENVIRONMENT: Docker
+      ASPNETCORE_URLS: http://+:8080
+    ports:
+      - "5197:8080"
+    depends_on:
+      identity:
+        condition: service_started
+      wallet:
+        condition: service_started
+      telemetry:
+        condition: service_started
+    networks:
+      - municipality-net
+
+  simulator:
+    build:
+      context: .
+      dockerfile: tools/simulator/Dockerfile
+    container_name: municipality-simulator
+    profiles: ["simulation"]
+    environment:
+      SIMULATOR_BASE_URL: http://gateway:8080
+      SIMULATOR_TENANT_ID: ankara
+      SIMULATOR_DURATION_SECONDS: "60"
+      SIMULATOR_CONCURRENCY: "16"
+      SIMULATOR_DELAY_MS: "50"
+    depends_on:
+      gateway:
+        condition: service_started
+    networks:
+      - municipality-net
+
+networks:
+  municipality-net:
+    driver: bridge

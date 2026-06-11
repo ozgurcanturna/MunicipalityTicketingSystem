@@ -140,6 +140,35 @@ Eklenen bölüm:
 }
 ```
 
+### 6.3 EventBusOptions (Step 11 ile genisletme)
+Dosya: workers/event-processor/Configuration/EventBusOptions.cs
+
+Bu adimdaki in-memory altyapi korunurken, Step 11'de broker tabanli ortama gecis icin EventBus konfigurasyon modeli eklenmistir.
+
+Temel alanlar:
+- Provider (InMemory, RabbitMq)
+- ExchangeName
+- QueueName
+- DeadLetterQueueName
+- PrefetchCount
+
+Not: Bu model, event bus teknolojisini degistirdigimizde kod degistirmeden konfigurasyonla yonetebilmek icin eklenmistir.
+
+---
+
+## 6.4) Event Bus Best Practice Notlari
+
+Event processor adimi minimum calisirliktan production dayanikliligina tasinmak istendiginde asagidaki ilkeler takip edilmelidir:
+
+1. Consumer tarafinda idempotency zorunlu olmali (EventId bazli)
+2. Retry politikasi sinirli ve configurable olmali
+3. Dead-letter queue ayri tutulmali ve operasyonel olarak izlenmeli
+4. Provider bilgisi kodda sabit degil, konfigurasyon bazli olmali
+5. CorrelationId log ve trace zincirinde tasinmali
+6. Outbox/Inbox desenleri ile exactly-once etkisine yaklasilmali
+
+Bu checklist'in ilk teknik altyapisi Step 11'de docker + rabbitmq kurulumu ile baslatilmistir.
+
 ---
 
 ## 7) Doğrulama

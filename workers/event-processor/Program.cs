@@ -8,6 +8,8 @@ var builder = Host.CreateApplicationBuilder(args);
 
 builder.Services.Configure<EventProcessorOptions>(
 	builder.Configuration.GetSection(EventProcessorOptions.SectionName));
+builder.Services.Configure<EventBusOptions>(
+	builder.Configuration.GetSection(EventBusOptions.SectionName));
 
 builder.Services.AddSingleton<IEventQueue, InMemoryEventQueue>();
 builder.Services.AddSingleton<IProcessedEventStore, InMemoryProcessedEventStore>();

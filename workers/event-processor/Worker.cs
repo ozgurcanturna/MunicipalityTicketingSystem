@@ -14,6 +14,7 @@ public sealed class Worker : BackgroundService
     private readonly IProcessedEventStore _processedEventStore;
     private readonly IDeadLetterStore _deadLetterStore;
     private readonly EventProcessorOptions _options;
+    private readonly EventBusOptions _eventBusOptions;
 
     public Worker(
         ILogger<Worker> logger,
@@ -21,7 +22,8 @@ public sealed class Worker : BackgroundService
         IEventQueue eventQueue,
         IProcessedEventStore processedEventStore,
         IDeadLetterStore deadLetterStore,
-        IOptions<EventProcessorOptions> options)
+        IOptions<EventProcessorOptions> options,
+        IOptions<EventBusOptions> eventBusOptions)
     {
         _logger = logger;
         _serviceProvider = serviceProvider;
@@ -29,10 +31,19 @@ public sealed class Worker : BackgroundService
         _processedEventStore = processedEventStore;
         _deadLetterStore = deadLetterStore;
         _options = options.Value;
+        _eventBusOptions = eventBusOptions.Value;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        _logger.LogInformation(
+            "Event processor started. Provider={Provider}, Exchange={Exchange}, Queue={Queue}, DLQ={DeadLetterQueue}, MaxRetry={MaxRetry}",
+            _eventBusOptions.Provider,
+            _eventBusOptions.ExchangeName,
+            _eventBusOptions.QueueName,
+            _eventBusOptions.DeadLetterQueueName,
+            _options.MaxRetryCount);
+
         await SeedEventsIfEnabledAsync(stoppingToken);
 
         while (!stoppingToken.IsCancellationRequested)

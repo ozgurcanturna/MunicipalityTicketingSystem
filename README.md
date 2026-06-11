@@ -140,6 +140,8 @@ MunicipalityTicketing/
 | [docs/Step-07-EventProcessor.md](docs/Step-07-EventProcessor.md) | Event consumer, retry ve dead-letter adımları |
 | [docs/Step-08-ApiGateway.md](docs/Step-08-ApiGateway.md) | Gateway routing, header ve rate-limit adımları |
 | [docs/Step-09-Testing.md](docs/Step-09-Testing.md) | Unit ve integration test adımları |
+| [docs/Step-10-SimulationClients.md](docs/Step-10-SimulationClients.md) | Simulator ile gateway uzerinden yuk testi adımları |
+| [docs/Step-11-DockerDeployment.md](docs/Step-11-DockerDeployment.md) | Docker compose kurulumu ve event bus deployment adımları |
 
 ---
 
@@ -190,8 +192,8 @@ Proje tamamlandığında simulation client'ları ile aşağıdaki senaryolar tes
 | 07 | Event Processor | ✅ Tamamlandı |
 | 08 | API Gateway | ✅ Tamamlandı |
 | 09 | Testing | ✅ Tamamlandı |
-| 10 | Simulation Clients | 📝 Planlandı |
-| 11 | Docker & Deployment | 📝 Planlandı |
+| 10 | Simulation Clients | ✅ Tamamlandı |
+| 11 | Docker & Deployment | ✅ Tamamlandı |
 
 ---
 
