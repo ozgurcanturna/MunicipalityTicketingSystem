@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="9.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\core\SharedKernel.Domain.csproj" />
     <ProjectReference Include="..\..\core\SharedKernel.Infrastructure.csproj" />
   </ItemGroup>
