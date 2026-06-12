@@ -14,7 +14,7 @@
 | Pattern | DDD (Domain-Driven Design) + CQRS |
 | Style | Microservices with event-driven communication |
 | Multi-Tenancy | Database-per-Tenant (full isolation) |
-| Messaging | Brighter (commands) & Darker (queries) |
+| Messaging | Brighter & Darker (domain events) + RabbitMQ transport |
 | API Gateway | YARP reverse proxy |
 | Caching | Redis (StackExchange.Redis) |
 | ORM | Entity Framework Core 10 |
@@ -158,7 +158,7 @@ public Result<Ticket> PurchaseTicket(CreateTicketRequest request)
 | Category | Tool | Purpose |
 | ---------- | ------ | --------- |
 | Framework | .NET 10 | Backend runtime |
-| Messaging | Brighter & Darker | CQRS, event-driven |
+| Messaging | Brighter & Darker + RabbitMQ transport | CQRS, event-driven |
 | ORM | EF Core 10 | Data persistence |
 | Cache | StackExchange.Redis | Distributed caching |
 | Validation | FluentValidation | Request validation |

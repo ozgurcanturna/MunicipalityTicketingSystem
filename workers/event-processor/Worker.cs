@@ -37,8 +37,9 @@ public sealed class Worker : BackgroundService
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         _logger.LogInformation(
-            "Event processor started. Provider={Provider}, Exchange={Exchange}, Queue={Queue}, DLQ={DeadLetterQueue}, MaxRetry={MaxRetry}",
-            _eventBusOptions.Provider,
+            "Event processor started. Stack={Stack}, Transport={Transport}, Exchange={Exchange}, Queue={Queue}, DLQ={DeadLetterQueue}, MaxRetry={MaxRetry}",
+            _eventBusOptions.Stack,
+            _eventBusOptions.Transport,
             _eventBusOptions.ExchangeName,
             _eventBusOptions.QueueName,
             _eventBusOptions.DeadLetterQueueName,

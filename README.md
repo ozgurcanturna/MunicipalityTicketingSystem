@@ -38,7 +38,7 @@ graph TB
 
     subgraph "Infrastructure"
         Redis[Redis Cache]
-        MessageBus[Brighter/Darker]
+        MessageBus[Brighter & Darker<br/>RabbitMQ transport]
         OTel[OpenTelemetry]
     end
 
@@ -97,7 +97,7 @@ Bu repo Step 01-11 icin teknik bir MVP akisi sunar. Ancak Step dokumanlarinda ta
 - Identity/Wallet/Telemetry minimal endpointleri ve temel domain kurallari
 - Identity bootstrap + JWT login + BCrypt password hashing + rol bazli endpoint korumalari + Bursa/Eskişehir/Van/Mersin demo tenant/user seed
 - Gateway katmaninda merkezi JWT dogrulamasi ve tenant-claim kontrolu
-- Event processor (in-memory queue, retry, dead-letter, idempotency)
+- Event processor (Brighter & Darker stack, RabbitMQ transport, retry, dead-letter, idempotency)
 - YARP gateway routing + tenant header zorunlulugu + basic rate limit
 - Unit ve integration testlerin temel kapsami
 - Docker compose ile lokal ortam kurulumu
@@ -106,7 +106,7 @@ Bu repo Step 01-11 icin teknik bir MVP akisi sunar. Ancak Step dokumanlarinda ta
 
 - JWT authentication ve RBAC (FR-001) icin Bursa, Eskişehir, Van ve Mersin demo seed, temel roller ve ornek kullanicilar eklendi; admin/provisioning arayuzleri ve production hardening devam ediyor
 - Bilet yonetimi (FR-003: QR, iade/iptal, ticket lifecycle) ayri bir servis olarak uygulanmadi
-- Brighter/Darker gercek mesajlasma entegrasyonu yerine worker tarafinda in-memory queue kullaniliyor
+- Brighter & Darker domain event katmani kullaniliyor; RabbitMQ transport compose ve appsettings tarafinda tanimli, producer/consumer hardening devam ediyor
 - Serilog/OpenTelemetry/Prometheus/Grafana gozlemlenebilirlik zinciri tam entegre degil
 - CI/CD, zero-downtime deployment ve feature flag gibi operasyonel hedefler dokumante ama kod/pipeline seviyesinde tam uygulanmadi
 

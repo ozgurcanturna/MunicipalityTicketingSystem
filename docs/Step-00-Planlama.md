@@ -146,11 +146,11 @@
 | **Orchestration** | Docker Compose | Apache 2.0 | Local development |
 
 ### Neden Brighter & Darker?
-- **MassTransit alternatifi**: Daha hafif, daha fazla kontrol
-- **Command/Query Separation**: CQRS pattern native support
-- **Outbox Pattern**: Transactional message publishing
-- **Scheduler**: Delayed job execution
-- **Community**: Aktif open-source community
+- **Domain event uyumu**: Command ve event akışlarını uygulama katmanında ayrıştırır
+- **Transport soyutlaması**: RabbitMQ gibi broker'lar alttan değiştirilebilir
+- **CQRS desteği**: Komut ve event işleme katmanlarını net ayırır
+- **Test edilebilirlik**: Broker bağımlılığını izole etmek daha kolaydır
+- **Compose uyumu**: RabbitMQ transport lokal geliştirmede altyapı olarak kalır
 
 ---
 
@@ -177,7 +177,7 @@ graph TB
 
     subgraph "Infrastructure"
         Redis[Redis Cache]
-        MessageBus[Brighter/Darker<br/>Message Bus]
+        MessageBus[Brighter & Darker<br/>RabbitMQ transport]
         OTel[OpenTelemetry Collector]
     end
 
@@ -235,21 +235,25 @@ graph TB
 ### Mimari Kararlar
 
 #### 1. Database-per-Tenant Pattern
+
 - **Avantaj**: Tam izolasyon, kolay backup/restore, compliance
 - **Dezavantaj**: Connection overhead, migration complexity
 - **Çözüm**: Connection pooling, schema-based multi-tenancy option
 
 #### 2. Event-Driven Architecture
-- **Brighter Command Processor**: Sync operations
-- **Darker Event Handlers**: Async event processing
+
+- **Brighter & Darker**: Domain event ve handler katmanlarını yönetir
+- **RabbitMQ transport**: Broker altyapısı olarak kullanılır
 - **Outbox Pattern**: Reliable message delivery
 
 #### 3. CQRS Pattern
+
 - **Commands**: Write operations (CreateTicket, DeductBalance)
 - **Queries**: Read operations (GetBalance, GetTicketHistory)
 - **Separate Models**: Optimized for read/write patterns
 
 #### 4. Circuit Breaker & Retry
+
 - **Polly Policies**: Transient fault handling
 - **Exponential Backoff**: Prevent cascade failures
 - **Fallback**: Graceful degradation

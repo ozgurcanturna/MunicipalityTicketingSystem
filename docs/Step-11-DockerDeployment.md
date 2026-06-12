@@ -7,7 +7,7 @@ Bu adim sonunda:
 - Her servis/worker/simulator icin Dockerfile vardir.
 - Kok dizinde docker-compose.yml ile tum sistem calisir.
 - SQL Server, Redis ve RabbitMQ altyapisi compose icindedir.
-- Worker tarafinda EventBus konfigurasyonu ayri options sinifi ile okunur.
+- Worker tarafinda Brighter & Darker stack ve RabbitMQ transport konfigurasyonu ayri options sinifi ile okunur.
 
 ## Eklenen Dosyalar
 1. docker-compose.yml
@@ -29,7 +29,7 @@ Bu adim sonunda:
 1. workers/event-processor/Program.cs
    - EventBus section icin options binding eklendi.
 2. workers/event-processor/Worker.cs
-   - Event bus provider/exchange/queue/dlq bilgileri startup log'una eklendi.
+   - Event bus stack/transport/exchange/queue/dlq bilgileri startup log'una eklendi.
 
 ## Compose Topolojisi
 - sqlserver (mssql 2022)
@@ -44,8 +44,9 @@ Bu adim sonunda:
 
 ## Event Bus Best Practices (Bu Adimda Uygulanan + Yol Haritasi)
 ### Uygulananlar
-1. Provider abstraction konfigurasyonu:
-   - EventBus:Provider alani ile InMemory veya RabbitMq secimi
+1. Stack/transport abstraction konfigurasyonu:
+   - EventBus:Stack alani ile BrighterDarker secimi
+   - EventBus:Transport alani ile InMemory veya RabbitMq secimi
 2. DLQ isimlendirmesi ve ayri queue tanimi:
    - DeadLetterQueueName
 3. Retry politikasinin configurable olmasi:
@@ -53,7 +54,7 @@ Bu adim sonunda:
 4. Prefetch ayari:
    - EventBus:PrefetchCount
 5. Gozlemlenebilirlik:
-   - Worker startup'ta provider/exchange/queue/dlq bilgilerini loglar.
+   - Worker startup'ta stack/transport/exchange/queue/dlq bilgilerini loglar.
 
 ### Sonraki Teknik Adimlar (Production Harden)
 1. Outbox pattern (publisher servislerde)
@@ -91,9 +92,10 @@ docker compose down
 ```
 
 ## Ogrenme Notu
-Docker ortaminda appsettings.Docker.json aktif olur cunku compose icinde ASPNETCORE_ENVIRONMENT=Docker (worker icin DOTNET_ENVIRONMENT=Docker) set edilmistir.
+Docker ortaminda appsettings.Docker.json aktif olur cunku compose icinde ASPNETCORE_ENVIRONMENT=Docker (worker icin DOTNET_ENVIRONMENT=Docker) set edilmistir. Bu sayede Brighter & Darker stack, RabbitMQ transport ile calisir.
 
 ## Tamamlanma Kontrol Listesi
+
 - [x] Dockerfile'lar eklendi.
 - [x] docker-compose.yml eklendi.
 - [x] Altyapi container'lari eklendi (sqlserver, redis, rabbitmq).

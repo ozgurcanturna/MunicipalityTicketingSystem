@@ -4,7 +4,8 @@ public sealed class EventBusOptions
 {
     public const string SectionName = "EventBus";
 
-    public string Provider { get; init; } = "InMemory";
+    public string Stack { get; init; } = "BrighterDarker";
+    public string Transport { get; init; } = "InMemory";
     public string Host { get; init; } = "rabbitmq";
     public int Port { get; init; } = 5672;
     public string UserName { get; init; } = "guest";

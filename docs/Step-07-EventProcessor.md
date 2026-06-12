@@ -1,9 +1,12 @@
 # Step 07: Event Processor - Event Consumer ve Retry Pipeline
 
 ## 🎯 Amaç
+
 Bu adımda Event Processor worker, gelen integration event'leri idempotent ve retry destekli şekilde işleyecek temel mimariye taşınır.
 
 Bu adım sonunda:
+
+- Brighter & Darker tabanlı domain event yaklaşımı için sözleşmeler netleşir.
 - In-memory event queue altyapısı hazır olur.
 - Event handler çözümleme (resolver) mekanizması kurulur.
 - Retry + dead-letter akışı çalışır.
@@ -12,6 +15,7 @@ Bu adım sonunda:
 ---
 
 ## ✅ Önkoşullar
+
 - Step 00, 01, 02, 03, 04, 05, 06 tamamlanmış olmalı.
 
 ---
@@ -146,13 +150,14 @@ Dosya: workers/event-processor/Configuration/EventBusOptions.cs
 Bu adimdaki in-memory altyapi korunurken, Step 11'de broker tabanli ortama gecis icin EventBus konfigurasyon modeli eklenmistir.
 
 Temel alanlar:
-- Provider (InMemory, RabbitMq)
+- Stack (BrighterDarker)
+- Transport (InMemory, RabbitMq)
 - ExchangeName
 - QueueName
 - DeadLetterQueueName
 - PrefetchCount
 
-Not: Bu model, event bus teknolojisini degistirdigimizde kod degistirmeden konfigurasyonla yonetebilmek icin eklenmistir.
+Not: Bu model, Brighter & Darker domain event katmanini korurken alttaki transport'u konfigurasyonla yonetebilmek icin eklenmistir.
 
 ---
 
@@ -163,11 +168,11 @@ Event processor adimi minimum calisirliktan production dayanikliligina tasinmak 
 1. Consumer tarafinda idempotency zorunlu olmali (EventId bazli)
 2. Retry politikasi sinirli ve configurable olmali
 3. Dead-letter queue ayri tutulmali ve operasyonel olarak izlenmeli
-4. Provider bilgisi kodda sabit degil, konfigurasyon bazli olmali
+4. Stack ve transport bilgisi kodda sabit degil, konfigurasyon bazli olmali
 5. CorrelationId log ve trace zincirinde tasinmali
 6. Outbox/Inbox desenleri ile exactly-once etkisine yaklasilmali
 
-Bu checklist'in ilk teknik altyapisi Step 11'de docker + rabbitmq kurulumu ile baslatilmistir.
+Bu checklist'in ilk teknik altyapisi Step 11'de docker + RabbitMQ transport kurulumu ile baslatilmistir.
 
 ---
 
