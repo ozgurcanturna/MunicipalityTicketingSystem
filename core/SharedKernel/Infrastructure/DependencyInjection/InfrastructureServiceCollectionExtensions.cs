@@ -24,6 +24,7 @@ public static class InfrastructureServiceCollectionExtensions
             var tenantProvider = serviceProvider.GetRequiredService<ITenantProvider>();
             var resolver = serviceProvider.GetRequiredService<TenantConnectionStringResolver>();
             var connectionString = resolver.Resolve(tenantProvider.TenantId);
+            PostgresDatabaseInitializer.EnsureDatabaseExists(connectionString);
 
             if (dbOptions is not null)
             {
@@ -31,7 +32,7 @@ public static class InfrastructureServiceCollectionExtensions
                 return;
             }
 
-            options.UseSqlServer(connectionString);
+            options.UseNpgsql(connectionString);
         });
 
         ConfigureRedisCache(services, configuration);

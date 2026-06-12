@@ -6,7 +6,7 @@ Bu adimda tum mikroservisler lokal Docker Desktop ortaminda tek komutla ayağa k
 Bu adim sonunda:
 - Her servis/worker/simulator icin Dockerfile vardir.
 - Kok dizinde docker-compose.yml ile tum sistem calisir.
-- SQL Server, Redis ve RabbitMQ altyapisi compose icindedir.
+- PostgreSQL, Redis ve RabbitMQ altyapisi compose icindedir.
 - Worker tarafinda Brighter & Darker stack ve RabbitMQ transport konfigurasyonu ayri options sinifi ile okunur.
 
 ## Eklenen Dosyalar
@@ -98,7 +98,7 @@ Docker ortaminda appsettings.Docker.json aktif olur cunku compose icinde ASPNETC
 
 - [x] Dockerfile'lar eklendi.
 - [x] docker-compose.yml eklendi.
-- [x] Altyapi container'lari eklendi (sqlserver, redis, rabbitmq).
+- [x] Altyapi container'lari eklendi (postgres, redis, rabbitmq).
 - [x] Docker appsettings override'lari eklendi.
 - [x] Event bus options sinifi ve binding eklendi.
 - [x] Event bus best-practice notlari dokumante edildi.

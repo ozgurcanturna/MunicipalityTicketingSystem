@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Tenant.Identity.Api.Domain.Entities;
 using Tenant.Identity.Api.Infrastructure.Authentication;
 using Tenant.Identity.Api.Infrastructure.Persistence;
+using SharedKernel.Infrastructure.Persistence;
 
 namespace Tenant.Identity.Api.Infrastructure.Seeding;
 
@@ -29,8 +30,10 @@ public sealed class IdentityDatabaseSeeder
             throw new InvalidOperationException("ConnectionStrings:Default ayarı zorunludur.");
         }
 
+        PostgresDatabaseInitializer.EnsureDatabaseExists(connectionString);
+
         var options = new DbContextOptionsBuilder<IdentityDbContext>()
-            .UseSqlServer(connectionString)
+            .UseNpgsql(connectionString)
             .Options;
 
         await using var dbContext = new IdentityDbContext(options);

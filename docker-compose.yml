@@ -1,18 +1,19 @@
 name: municipality-ticketing
 
 services:
-  sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: municipality-sqlserver
+  postgres:
+    image: postgres:16-alpine
+    container_name: municipality-postgres
     environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "Your_strong_password123!"
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "Your_strong_password123!"
+      POSTGRES_DB: MunicipalityTicketing.Default
     ports:
-      - "14333:1433"
+      - "5433:5432"
     networks:
       - municipality-net
     healthcheck:
-      test: ["CMD-SHELL", "bash -c '</dev/tcp/127.0.0.1/1433' || exit 1"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d MunicipalityTicketing.Default"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -45,7 +46,7 @@ services:
     ports:
       - "5115:8080"
     depends_on:
-      sqlserver:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_started
@@ -65,7 +66,7 @@ services:
     ports:
       - "5136:8080"
     depends_on:
-      sqlserver:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_started
@@ -85,7 +86,7 @@ services:
     ports:
       - "5169:8080"
     depends_on:
-      sqlserver:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_started
@@ -102,7 +103,7 @@ services:
     environment:
       DOTNET_ENVIRONMENT: Docker
     depends_on:
-      sqlserver:
+      postgres:
         condition: service_healthy
       redis:
         condition: service_started

@@ -30,7 +30,7 @@ Dosya: core/SharedKernel/Infrastructure/SharedKernel.Infrastructure.csproj
 ### 1.2 Paketler
 - Microsoft.EntityFrameworkCore
 - Microsoft.EntityFrameworkCore.Relational
-- Microsoft.EntityFrameworkCore.SqlServer
+- Npgsql.EntityFrameworkCore.PostgreSQL
 - Microsoft.Extensions.Caching.StackExchangeRedis
 - Microsoft.Extensions.Configuration.Abstractions
 - Microsoft.Extensions.DependencyInjection.Abstractions
@@ -136,7 +136,7 @@ public static class InfrastructureServiceCollectionExtensions
                 return;
             }
 
-            options.UseSqlServer(connectionString);
+            options.UseNpgsql(connectionString);
         });
 
         ConfigureRedisCache(services, configuration);
@@ -187,7 +187,7 @@ Eklenen bölüm:
 - ConnectionStrings:Tenants:van
 - ConnectionStrings:Tenants:mersin
 
-Bu yapı sayesinde tenant id yoksa Default bağlantı kullanılır, tenant id varsa tenant bazlı bağlantıya düşülür.
+Bu yapı sayesinde tenant id yoksa Default bağlantı kullanılır, tenant id varsa tenant bazlı PostgreSQL veritabanına düşülür.
 
 ---
 
@@ -206,7 +206,7 @@ Beklenen sonuç: tüm build ve test adımları başarılı olmalı.
 
 ## 7) Tamamlanma Kontrol Listesi
 
-- [x] SharedKernel.Infrastructure, EF provider ve Redis paketleri ile güncellendi.
+- [x] SharedKernel.Infrastructure, Npgsql EF provider ve Redis paketleri ile güncellendi.
 - [x] Tenant provider sözleşmesi eklendi.
 - [x] Tenant connection string resolver eklendi.
 - [x] Infrastructure DI extension metodu eklendi.
