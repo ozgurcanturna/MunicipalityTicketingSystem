@@ -1,4 +1,5 @@
 using SharedKernel.Domain.Entities;
+using Tenant.Identity.Api.Domain.Constants;
 
 namespace Tenant.Identity.Api.Domain.Entities;
 
@@ -16,8 +17,9 @@ public sealed class User : Entity
     {
     }
 
-    private User(Guid tenantId, string email, string fullName, string passwordHash, string role)
+    private User(Guid id, Guid tenantId, string email, string fullName, string passwordHash, string role)
     {
+        Id = id;
         TenantId = tenantId;
         Email = email;
         FullName = fullName;
@@ -25,7 +27,7 @@ public sealed class User : Entity
         Role = role;
     }
 
-    public static User Create(Guid tenantId, string email, string fullName, string passwordHash, string role)
+    public static User Create(Guid tenantId, string email, string fullName, string passwordHash, string role, Guid? id = null)
     {
         if (tenantId == Guid.Empty)
         {
@@ -52,7 +54,14 @@ public sealed class User : Entity
             throw new ArgumentException("Role zorunludur.", nameof(role));
         }
 
-        return new User(tenantId, email, fullName, passwordHash, role.Trim().ToUpperInvariant());
+        var normalizedRole = role.Trim().ToUpperInvariant();
+
+        if (!IdentityRoles.IsSupported(normalizedRole))
+        {
+            throw new ArgumentException($"Desteklenmeyen rol: {normalizedRole}", nameof(role));
+        }
+
+        return new User(id ?? Guid.NewGuid(), tenantId, email, fullName, passwordHash, normalizedRole);
     }
 
     public void RecordLogin()

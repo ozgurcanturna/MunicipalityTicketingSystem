@@ -5,6 +5,7 @@
 Belediyeler için geliştirilen yüksek ölçeklenebilir, multi-tenant otobüs biletleme sistemi. Bu proje, 15 kişilik hayali bir yazılım ekibinin proje lideri tarafından, DDD (Domain-Driven Design) prensipleri ve mikroservis mimarisi kullanılarak geliştirilmektedir.
 
 ### Senaryo
+
 - **İlk Müşteriler**: 4 belediye
 - **Performans Hedefi** (her belediye için):
   - 10 milyon+ günlük aktif bilet kullanımı
@@ -72,7 +73,7 @@ graph TB
 ## 🛠️ Teknolojiler
 
 | Kategori | Araç | Lisans |
-|----------|------|--------|
+| ---------- | ------ | -------- |
 | Framework | .NET 10 | MIT |
 | Message Bus | Brighter & Darker | Apache 2.0 |
 | ORM | Entity Framework Core 10 | MIT |
@@ -94,7 +95,7 @@ Bu repo Step 01-11 icin teknik bir MVP akisi sunar. Ancak Step dokumanlarinda ta
 
 - Shared Kernel + EF Core + Redis tabanli altyapi
 - Identity/Wallet/Telemetry minimal endpointleri ve temel domain kurallari
-- Identity bootstrap + JWT login + BCrypt password hashing + rol bazli endpoint korumalari
+- Identity bootstrap + JWT login + BCrypt password hashing + rol bazli endpoint korumalari + demo tenant/user seed
 - Gateway katmaninda merkezi JWT dogrulamasi ve tenant-claim kontrolu
 - Event processor (in-memory queue, retry, dead-letter, idempotency)
 - YARP gateway routing + tenant header zorunlulugu + basic rate limit
@@ -103,7 +104,7 @@ Bu repo Step 01-11 icin teknik bir MVP akisi sunar. Ancak Step dokumanlarinda ta
 
 ### Henuz eksik veya kismi kalan kritik hedefler
 
-- JWT authentication ve RBAC (FR-001) tam uygulanmadi
+- JWT authentication ve RBAC (FR-001) icin demo seed, temel roller ve ornek kullanicilar eklendi; admin/provisioning arayuzleri ve production hardening devam ediyor
 - Bilet yonetimi (FR-003: QR, iade/iptal, ticket lifecycle) ayri bir servis olarak uygulanmadi
 - Brighter/Darker gercek mesajlasma entegrasyonu yerine worker tarafinda in-memory queue kullaniliyor
 - Serilog/OpenTelemetry/Prometheus/Grafana gozlemlenebilirlik zinciri tam entegre degil
@@ -115,7 +116,7 @@ Not: Step durumlarinin "tamamlandi" olmasi, adim bazli MVP tesliminin tamamlandi
 
 ## 📁 Proje Yapısı
 
-```
+```text
 MunicipalityTicketing/
 ├── core/                          # Shared Kernel
 │   └── SharedKernel/
@@ -155,7 +156,7 @@ MunicipalityTicketing/
 ## 📋 Dokümantasyon
 
 | Dosya | Açıklama |
-|-------|----------|
+| ------- | ---------- |
 | [docs/skills.md](docs/skills.md) | Developer becerileri ve kodlama standartları |
 | [docs/Step-00-Planlama.md](docs/Step-00-Planlama.md) | İş gereksinimleri, mimari, tool set |
 | [docs/Step-01-InitialSetup.md](docs/Step-01-InitialSetup.md) | Proje kurulumu ve temizlik adımları |
@@ -176,11 +177,13 @@ MunicipalityTicketing/
 ## 🚀 Başlangıç
 
 ### Gereksinimler
+
 - .NET 10 SDK
 - Docker & Docker Compose
 - Git
 
 ### Kurulum (Yakında)
+
 ```bash
 # Clone repository
 git clone <repo-url>
@@ -209,7 +212,7 @@ Proje tamamlandığında simulation client'ları ile aşağıdaki senaryolar tes
 ## 📝 Geliştirme Adımları
 
 | Step | Konu | Durum |
-|------|------|-------|
+| ------ | ------ | ------- |
 | 00 | Planlama ve Gereksinimler | ✅ Tamamlandı |
 | 01 | Initial Setup - Template Temizliği | ✅ MVP Tamamlandı |
 | 02 | Shared Kernel - Domain Base Classes | ✅ MVP Tamamlandı |

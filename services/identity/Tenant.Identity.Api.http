@@ -1,35 +1,23 @@
 @Tenant.Identity.Api_HostAddress = http://localhost:5115
-@bootstrapTenantName = ankara
-@bootstrapAdminEmail = admin@ankara.local
-@bootstrapAdminFullName = Ankara Admin
-@bootstrapAdminPassword = P@ssw0rd!
-@tenantId = 00000000-0000-0000-0000-000000000000
+@tenantId = 7f4c8c0f-1d7b-4d52-8a4d-000000000001
+@adminEmail = admin@ankara.local
+@adminPassword = P@ssw0rd!
 @adminToken = paste-admin-token-here
 @operatorEmail = operator@ankara.local
+@userEmail = user@ankara.local
 
 GET {{Tenant.Identity.Api_HostAddress}}/
 Accept: application/json
 
-### Bootstrap first tenant and admin
-POST {{Tenant.Identity.Api_HostAddress}}/auth/bootstrap
-Content-Type: application/json
-
-{
-	"tenantName": "{{bootstrapTenantName}}",
-	"adminEmail": "{{bootstrapAdminEmail}}",
-	"adminFullName": "{{bootstrapAdminFullName}}",
-	"adminPassword": "{{bootstrapAdminPassword}}"
-}
-
-### Login as admin after bootstrap
+### Login as seeded admin
 POST {{Tenant.Identity.Api_HostAddress}}/auth/login
 X-Tenant-Id: {{tenantId}}
 Content-Type: application/json
 
 {
 	"tenantId": "{{tenantId}}",
-	"email": "{{bootstrapAdminEmail}}",
-	"password": "{{bootstrapAdminPassword}}"
+	"email": "{{adminEmail}}",
+	"password": "{{adminPassword}}"
 }
 
 ### Inspect current principal
@@ -49,6 +37,19 @@ Content-Type: application/json
 	"fullName": "Ankara Operator",
 	"password": "P@ssw0rd!",
 	"role": "OPERATOR"
+}
+
+### Create user role account
+POST {{Tenant.Identity.Api_HostAddress}}/tenants/{{tenantId}}/users
+Authorization: Bearer {{adminToken}}
+X-Tenant-Id: {{tenantId}}
+Content-Type: application/json
+
+{
+	"email": "{{userEmail}}",
+	"fullName": "Ankara User",
+	"password": "P@ssw0rd!",
+	"role": "USER"
 }
 
 ### Read tenant details

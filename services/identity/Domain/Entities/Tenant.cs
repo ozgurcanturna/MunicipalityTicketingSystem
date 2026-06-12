@@ -20,6 +20,13 @@ public sealed class MunicipalityTenant : AggregateRoot
         RegisterCreated();
     }
 
+    private MunicipalityTenant(Guid id, string name)
+    {
+        Id = id;
+        Name = name;
+        RegisterCreated();
+    }
+
     public static MunicipalityTenant Create(string name)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -28,6 +35,21 @@ public sealed class MunicipalityTenant : AggregateRoot
         }
 
         return new MunicipalityTenant(name);
+    }
+
+    public static MunicipalityTenant Create(Guid id, string name)
+    {
+        if (id == Guid.Empty)
+        {
+            throw new ArgumentException("TenantId zorunludur.", nameof(id));
+        }
+
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Tenant adı zorunludur.", nameof(name));
+        }
+
+        return new MunicipalityTenant(id, name);
     }
 
     public User AddUser(string email, string fullName, string passwordHash, string role)

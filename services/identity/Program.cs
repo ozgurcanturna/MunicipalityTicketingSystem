@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using SharedKernel.Infrastructure.DependencyInjection;
 using SharedKernel.Infrastructure.MultiTenancy;
+using Tenant.Identity.Api.Domain.Constants;
 using Tenant.Identity.Api.Application.Contracts;
 using Tenant.Identity.Api.Application.Repositories;
 using Tenant.Identity.Api.Domain.Entities;
@@ -13,6 +14,7 @@ using Tenant.Identity.Api.Infrastructure.Authentication;
 using Tenant.Identity.Api.Infrastructure.MultiTenancy;
 using Tenant.Identity.Api.Infrastructure.Persistence;
 using Tenant.Identity.Api.Infrastructure.Repositories;
+using Tenant.Identity.Api.Infrastructure.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,7 +44,7 @@ builder.Services
 
 builder.Services.AddAuthorization(options =>
 {
-	options.AddPolicy("TenantAdmin", policy => policy.RequireRole("ADMIN"));
+	options.AddPolicy("TenantAdmin", policy => policy.RequireRole(IdentityRoles.Admin));
 	options.AddPolicy("AuthenticatedUser", policy => policy.RequireAuthenticatedUser());
 });
 
@@ -51,8 +53,15 @@ builder.Services.AddSharedInfrastructure<IdentityDbContext>(builder.Configuratio
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
 builder.Services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
+builder.Services.AddSingleton<IdentityDatabaseSeeder>();
 
 var app = builder.Build();
+
+await using (var scope = app.Services.CreateAsyncScope())
+{
+	var seeder = scope.ServiceProvider.GetRequiredService<IdentityDatabaseSeeder>();
+	await seeder.SeedAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -149,12 +158,19 @@ app.MapPost("/tenants", async (
 	ITenantRepository tenantRepository,
 	CancellationToken cancellationToken) =>
 {
-	var tenant = MunicipalityTenant.Create(request.Name.Trim());
+	try
+	{
+		var tenant = MunicipalityTenant.Create(request.Name.Trim());
 
-	await tenantRepository.AddAsync(tenant, cancellationToken);
-	await tenantRepository.SaveChangesAsync(cancellationToken);
+		await tenantRepository.AddAsync(tenant, cancellationToken);
+		await tenantRepository.SaveChangesAsync(cancellationToken);
 
-	return Results.Created($"/tenants/{tenant.Id}", TenantResponse.FromDomain(tenant));
+		return Results.Created($"/tenants/{tenant.Id}", TenantResponse.FromDomain(tenant));
+	}
+	catch (ArgumentException exception)
+	{
+		return Results.BadRequest(new { message = exception.Message });
+	}
 }).RequireAuthorization("TenantAdmin");
 
 app.MapGet("/tenants/{id:guid}", async (
@@ -183,15 +199,26 @@ app.MapPost("/tenants/{id:guid}/users", async (
 		return Results.NotFound();
 	}
 
-	var user = tenant.AddUser(
-		request.Email.Trim(),
-		request.FullName.Trim(),
-		passwordHasher.Hash(request.Password.Trim()),
-		request.Role.Trim());
-	tenantRepository.Update(tenant);
-	await tenantRepository.SaveChangesAsync(cancellationToken);
+	try
+	{
+		var user = tenant.AddUser(
+			request.Email.Trim(),
+			request.FullName.Trim(),
+			passwordHasher.Hash(request.Password.Trim()),
+			request.Role.Trim());
+		tenantRepository.Update(tenant);
+		await tenantRepository.SaveChangesAsync(cancellationToken);
 
-	return Results.Ok(UserResponse.FromDomain(user));
+		return Results.Ok(UserResponse.FromDomain(user));
+	}
+	catch (ArgumentException exception)
+	{
+		return Results.BadRequest(new { message = exception.Message });
+	}
+	catch (InvalidOperationException exception)
+	{
+		return Results.Conflict(new { message = exception.Message });
+	}
 }).RequireAuthorization("TenantAdmin");
 
 app.MapPost("/auth/login", async (

@@ -8,6 +8,7 @@ Bu adım sonunda:
 
 - Identity servisi kullanıcı girişi için JWT token üretebilir.
 - User modeli rol bilgisi taşır.
+- Identity servisi başlangıçta demo tenant, admin, operator ve user hesaplarını seed eder.
 - Wallet ve Telemetry servisleri bearer token doğrular.
 - Token içindeki tenant claim ile X-Tenant-Id header eşleştirilir.
 - Endpointler temel rollerle korunur.
@@ -94,6 +95,20 @@ Token claim'leri:
 - tenant_id
 - tenant_name
 
+### 2.4 Initial setup seed scriptleri
+
+Dosyalar:
+
+- services/identity/Domain/Constants/IdentityRoles.cs
+- services/identity/Infrastructure/Seeding/IdentitySeedCatalog.cs
+- services/identity/Infrastructure/Seeding/IdentityDatabaseSeeder.cs
+
+Davranış:
+
+- Uygulama açılışında `ConnectionStrings:Default` üzerinden schema hazırlanır.
+- Demo tenant ve örnek kullanıcılar eksikse her çalıştırmada tamamlanır.
+- Rol sabitleri tek noktadan yönetilir ve JWT/RBAC akışında aynı değerler kullanılır.
+
 ---
 
 ## 3) Identity API Endpointleri
@@ -118,6 +133,7 @@ Endpoint davranışı:
 1. POST /auth/bootstrap
 
 - Sistem hic tenant icermiyorsa ilk tenant + ilk ADMIN user olusturur.
+- Seed calistigi icin mevcut kurulumlarda conflict donmesi beklenir; demo hesaplar startup seeder ile gelir.
 - Response icinde bootstrap token dondurur.
 
 1. POST /auth/login
@@ -204,14 +220,13 @@ dotnet test MunicipalityTicketing.slnx
 Ornek akış:
 
 ```http
-POST /auth/bootstrap
+POST /auth/login
 Content-Type: application/json
 
 {
-  "tenantName": "ankara",
-  "adminEmail": "admin@ankara.local",
-  "adminFullName": "Ankara Admin",
-  "adminPassword": "P@ssw0rd!"
+  "tenantId": "7f4c8c0f-1d7b-4d52-8a4d-000000000001",
+  "email": "admin@ankara.local",
+  "password": "P@ssw0rd!"
 }
 ```
 
@@ -254,6 +269,7 @@ Gateway uzerinden ayni akis icin guncel ornekler:
 
 - [x] Identity servisine JWT token uretimi eklendi.
 - [x] User rol bilgisi domain modeline eklendi.
+- [x] Demo tenant, temel roller ve örnek kullanıcı seed akışı eklendi.
 - [x] Wallet servisinde bearer auth + RBAC eklendi.
 - [x] Telemetry servisinde bearer auth + RBAC eklendi.
 - [x] Gateway katmaninda merkezi JWT dogrulamasi eklendi.

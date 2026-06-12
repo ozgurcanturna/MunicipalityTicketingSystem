@@ -10,7 +10,7 @@
 ## 1. Architecture Constraints
 
 | Rule | Detail |
-|------|--------|
+| ------ | -------- |
 | Pattern | DDD (Domain-Driven Design) + CQRS |
 | Style | Microservices with event-driven communication |
 | Multi-Tenancy | Database-per-Tenant (full isolation) |
@@ -24,7 +24,7 @@
 
 ## 2. Project Structure
 
-```
+```text
 MunicipalityTicketing/
 ├── core/SharedKernel/
 │   ├── Domain/           # Base classes: Entity, AggregateRoot, ValueObject
@@ -77,6 +77,7 @@ public record TicketPurchasedEvent(Guid TicketId, Guid UserId, decimal Amount);
 ```
 
 ### File & Namespace Rules
+
 - **Namespace** = folder path (e.g., `SharedKernel.Domain.Entities`)
 - **One class per file** — filename matches class name
 - **Nullable reference types**: always enabled
@@ -87,6 +88,7 @@ public record TicketPurchasedEvent(Guid TicketId, Guid UserId, decimal Amount);
 ## 4. Coding Standards
 
 ### Error Handling
+
 - Use **Result pattern** for business logic — never throw exceptions for expected failures
 - Use **global exception middleware** for unhandled errors
 - Return **Problem Details (RFC 7807)** from API endpoints
@@ -102,16 +104,19 @@ public Result<Ticket> PurchaseTicket(CreateTicketRequest request)
 ```
 
 ### Async
+
 - All I/O operations **must** be async (`Task<T>`, `CancellationToken`)
 - Use `ConfigureAwait(false)` in library code
 - Never use `.Result` or `.Wait()` — no sync-over-async
 
 ### Validation
+
 - Use **FluentValidation** for request validation
 - Validate at API boundary, not in domain layer
 - Domain enforces invariants via constructor/factory methods
 
 ### Dependency Injection
+
 - Register services in `Program.cs` using extension methods
 - Use `IServiceCollection` extensions per feature area
 - Scoped lifetime for DbContext and repositories
@@ -122,7 +127,7 @@ public Result<Ticket> PurchaseTicket(CreateTicketRequest request)
 ## 5. DDD Rules
 
 | Concept | Rule |
-|---------|------|
+| --------- | ------ |
 | **Entity** | Has identity (`Guid Id`), mutable, tracked by EF Core |
 | **AggregateRoot** | Transaction boundary, owns child entities, has `Version` |
 | **ValueObject** | Immutable, equality by components, no identity |
@@ -130,6 +135,7 @@ public Result<Ticket> PurchaseTicket(CreateTicketRequest request)
 | **Repository** | One per aggregate root, interface in Domain, impl in Infrastructure |
 
 ### Aggregate Design Rules
+
 1. Aggregates reference other aggregates **by ID only**
 2. One transaction = one aggregate modification
 3. Use domain events for cross-aggregate side effects
@@ -150,7 +156,7 @@ public Result<Ticket> PurchaseTicket(CreateTicketRequest request)
 ## 7. Technology Stack
 
 | Category | Tool | Purpose |
-|----------|------|---------|
+| ---------- | ------ | --------- |
 | Framework | .NET 10 | Backend runtime |
 | Messaging | Brighter & Darker | CQRS, event-driven |
 | ORM | EF Core 10 | Data persistence |
@@ -167,7 +173,7 @@ public Result<Ticket> PurchaseTicket(CreateTicketRequest request)
 ## 8. Testing Strategy
 
 | Layer | Framework | Scope |
-|-------|-----------|-------|
+| ------- | ----------- | ------- |
 | Unit | xUnit + Moq + Shouldly | Domain logic, services |
 | Integration | xUnit + TestServer | API endpoints, DB queries |
 | Load | Custom simulator clients | 10M+ daily transactions |
@@ -190,7 +196,7 @@ public void Deduct_InsufficientBalance_ReturnsFailure()
 ## 9. Performance Targets
 
 | Metric | Target |
-|--------|--------|
+| -------- | -------- |
 | API response (p95) | < 200ms |
 | DB query (p95) | < 50ms |
 | Throughput per tenant | 10K req/sec |
@@ -205,7 +211,7 @@ public void Deduct_InsufficientBalance_ReturnsFailure()
 Development follows numbered step documents in `docs/`:
 
 | Step | Topic |
-|------|-------|
+| ------ | ------- |
 | 00 | Planning & Requirements |
 | 01 | Initial Setup & Template Cleanup |
 | 02 | Shared Kernel — Domain Base Classes |
