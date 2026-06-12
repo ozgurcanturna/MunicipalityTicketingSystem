@@ -182,8 +182,10 @@ Güncellenen dosyalar:
 Eklenen bölüm:
 - ConnectionStrings:Default
 - ConnectionStrings:Redis
-- ConnectionStrings:Tenants:ankara
-- ConnectionStrings:Tenants:istanbul
+- ConnectionStrings:Tenants:bursa
+- ConnectionStrings:Tenants:eskisehir
+- ConnectionStrings:Tenants:van
+- ConnectionStrings:Tenants:mersin
 
 Bu yapı sayesinde tenant id yoksa Default bağlantı kullanılır, tenant id varsa tenant bazlı bağlantıya düşülür.
 
@@ -219,11 +221,13 @@ Beklenen sonuç: tüm build ve test adımları başarılı olmalı.
 Step 04 (Identity Service) için hazır olan altyapı ve kalan ihtiyaçlar:
 
 ### Hazır Olanlar
+
 1. Tenant'a göre connection string çözümleme mekanizması
 2. EF Core + Redis register eden ortak extension
 3. Shared kernel domain ve repository altyapısı
 
 ### Kalan İhtiyaçlar
+
 1. IdentityDbContext oluşturulması
 2. Tenant/User aggregate modelleri
 3. Identity'ye özel repository arayüzleri
@@ -231,6 +235,7 @@ Step 04 (Identity Service) için hazır olan altyapı ve kalan ihtiyaçlar:
 5. Tenant id'yi request'ten okuyan gerçek ITenantProvider implementasyonu
 
 ### Risk ve Aksiyon
+
 1. Risk: Tenant id yanlış veya boş gelebilir
 Aksiyon: Middleware ile tenant doğrulama eklenmeli.
 

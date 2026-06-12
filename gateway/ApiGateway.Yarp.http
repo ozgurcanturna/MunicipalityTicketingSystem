@@ -1,7 +1,7 @@
 @ApiGateway.Yarp_HostAddress = http://localhost:5197
-@tenantName = ankara
+@tenantName = bursa
 @tenantId = 00000000-0000-0000-0000-000000000000
-@adminEmail = admin@ankara.local
+@adminEmail = admin@bursa.local
 @adminPassword = P@ssw0rd!
 @adminToken = paste-admin-token-here
 @operatorToken = paste-operator-token-here
@@ -18,7 +18,7 @@ Content-Type: application/json
 {
 	"tenantName": "{{tenantName}}",
 	"adminEmail": "{{adminEmail}}",
-	"adminFullName": "Ankara Admin",
+	"adminFullName": "Bursa Admin",
 	"adminPassword": "{{adminPassword}}"
 }
 

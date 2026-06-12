@@ -6,7 +6,7 @@ Belediyeler için geliştirilen yüksek ölçeklenebilir, multi-tenant otobüs b
 
 ### Senaryo
 
-- **İlk Müşteriler**: 4 belediye
+- **İlk Müşteriler**: Bursa, Eskişehir, Van ve Mersin
 - **Performans Hedefi** (her belediye için):
   - 10 milyon+ günlük aktif bilet kullanımı
   - 100.000+ günlük bilet/kredi satın alma
@@ -95,7 +95,7 @@ Bu repo Step 01-11 icin teknik bir MVP akisi sunar. Ancak Step dokumanlarinda ta
 
 - Shared Kernel + EF Core + Redis tabanli altyapi
 - Identity/Wallet/Telemetry minimal endpointleri ve temel domain kurallari
-- Identity bootstrap + JWT login + BCrypt password hashing + rol bazli endpoint korumalari + demo tenant/user seed
+- Identity bootstrap + JWT login + BCrypt password hashing + rol bazli endpoint korumalari + Bursa/Eskişehir/Van/Mersin demo tenant/user seed
 - Gateway katmaninda merkezi JWT dogrulamasi ve tenant-claim kontrolu
 - Event processor (in-memory queue, retry, dead-letter, idempotency)
 - YARP gateway routing + tenant header zorunlulugu + basic rate limit
@@ -104,7 +104,7 @@ Bu repo Step 01-11 icin teknik bir MVP akisi sunar. Ancak Step dokumanlarinda ta
 
 ### Henuz eksik veya kismi kalan kritik hedefler
 
-- JWT authentication ve RBAC (FR-001) icin demo seed, temel roller ve ornek kullanicilar eklendi; admin/provisioning arayuzleri ve production hardening devam ediyor
+- JWT authentication ve RBAC (FR-001) icin Bursa, Eskişehir, Van ve Mersin demo seed, temel roller ve ornek kullanicilar eklendi; admin/provisioning arayuzleri ve production hardening devam ediyor
 - Bilet yonetimi (FR-003: QR, iade/iptal, ticket lifecycle) ayri bir servis olarak uygulanmadi
 - Brighter/Darker gercek mesajlasma entegrasyonu yerine worker tarafinda in-memory queue kullaniliyor
 - Serilog/OpenTelemetry/Prometheus/Grafana gozlemlenebilirlik zinciri tam entegre degil

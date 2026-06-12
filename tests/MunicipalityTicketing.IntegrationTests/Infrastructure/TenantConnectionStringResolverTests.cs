@@ -12,15 +12,15 @@ public sealed class TenantConnectionStringResolverTests
             .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["ConnectionStrings:Default"] = "Default-Conn",
-                ["ConnectionStrings:Tenants:ankara"] = "Ankara-Conn"
+                ["ConnectionStrings:Tenants:bursa"] = "Bursa-Conn"
             })
             .Build();
 
         var resolver = new TenantConnectionStringResolver(configuration);
 
-        var result = resolver.Resolve("ankara");
+        var result = resolver.Resolve("bursa");
 
-        Assert.Equal("Ankara-Conn", result);
+        Assert.Equal("Bursa-Conn", result);
     }
 
     [Fact]

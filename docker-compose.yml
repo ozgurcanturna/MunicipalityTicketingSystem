@@ -139,7 +139,7 @@ services:
     profiles: ["simulation"]
     environment:
       SIMULATOR_BASE_URL: http://gateway:8080
-      SIMULATOR_TENANT_ID: ankara
+      SIMULATOR_TENANT_ID: bursa
       SIMULATOR_DURATION_SECONDS: "60"
       SIMULATOR_CONCURRENCY: "16"
       SIMULATOR_DELAY_MS: "50"

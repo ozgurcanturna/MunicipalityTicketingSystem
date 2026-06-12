@@ -2,7 +2,7 @@
 using System.Net;
 
 var baseUrl = Environment.GetEnvironmentVariable("SIMULATOR_BASE_URL") ?? "http://localhost:5197";
-var tenantId = Environment.GetEnvironmentVariable("SIMULATOR_TENANT_ID") ?? "ankara";
+var tenantId = Environment.GetEnvironmentVariable("SIMULATOR_TENANT_ID") ?? "bursa";
 var durationSeconds = ParseInt("SIMULATOR_DURATION_SECONDS", 30);
 var concurrency = ParseInt("SIMULATOR_CONCURRENCY", 8);
 var delayMs = ParseInt("SIMULATOR_DELAY_MS", 100);

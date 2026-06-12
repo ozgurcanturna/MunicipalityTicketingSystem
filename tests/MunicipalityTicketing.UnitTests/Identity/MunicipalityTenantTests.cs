@@ -15,7 +15,7 @@ public sealed class MunicipalityTenantTests
     [Fact]
     public void AddUser_WhenSameEmailAddedTwice_ShouldThrow()
     {
-        var tenant = MunicipalityTenant.Create("ankara");
+        var tenant = MunicipalityTenant.Create("bursa");
         tenant.AddUser("user@sample.com", "Test User", "hash-1", "ADMIN");
 
         var action = () => tenant.AddUser("USER@sample.com", "Another User", "hash-2", "USER");
@@ -26,7 +26,7 @@ public sealed class MunicipalityTenantTests
     [Fact]
     public void AddUser_WhenTenantIsInactive_ShouldThrow()
     {
-        var tenant = MunicipalityTenant.Create("ankara");
+        var tenant = MunicipalityTenant.Create("bursa");
         tenant.Deactivate();
 
         var action = () => tenant.AddUser("user@sample.com", "Test User", "hash-1", "USER");

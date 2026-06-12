@@ -8,7 +8,7 @@ Bu adım sonunda:
 
 - Identity servisi kullanıcı girişi için JWT token üretebilir.
 - User modeli rol bilgisi taşır.
-- Identity servisi başlangıçta demo tenant, admin, operator ve user hesaplarını seed eder.
+- Identity servisi başlangıçta Bursa, Eskişehir, Van ve Mersin demo tenantlarını admin, operator ve user hesaplarıyla seed eder.
 - Wallet ve Telemetry servisleri bearer token doğrular.
 - Token içindeki tenant claim ile X-Tenant-Id header eşleştirilir.
 - Endpointler temel rollerle korunur.
@@ -106,7 +106,7 @@ Dosyalar:
 Davranış:
 
 - Uygulama açılışında `ConnectionStrings:Default` üzerinden schema hazırlanır.
-- Demo tenant ve örnek kullanıcılar eksikse her çalıştırmada tamamlanır.
+- Bursa, Eskişehir, Van ve Mersin tenantları ile örnek kullanıcılar eksikse her çalıştırmada tamamlanır.
 - Rol sabitleri tek noktadan yönetilir ve JWT/RBAC akışında aynı değerler kullanılır.
 
 ---
@@ -225,7 +225,7 @@ Content-Type: application/json
 
 {
   "tenantId": "7f4c8c0f-1d7b-4d52-8a4d-000000000001",
-  "email": "admin@ankara.local",
+  "email": "admin@bursa.local",
   "password": "P@ssw0rd!"
 }
 ```
@@ -237,8 +237,8 @@ X-Tenant-Id: <tenant-guid>
 Content-Type: application/json
 
 {
-  "email": "operator@ankara.local",
-  "fullName": "Ankara Operator",
+  "email": "operator@bursa.local",
+  "fullName": "Bursa Operator",
   "password": "P@ssw0rd!",
   "role": "OPERATOR"
 }
@@ -251,7 +251,7 @@ Content-Type: application/json
 
 {
   "tenantId": "<tenant-guid>",
-  "email": "operator@ankara.local",
+  "email": "operator@bursa.local",
   "password": "P@ssw0rd!"
 }
 ```

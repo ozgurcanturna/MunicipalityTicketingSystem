@@ -1,10 +1,10 @@
 @Tenant.Identity.Api_HostAddress = http://localhost:5115
 @tenantId = 7f4c8c0f-1d7b-4d52-8a4d-000000000001
-@adminEmail = admin@ankara.local
+@adminEmail = admin@bursa.local
 @adminPassword = P@ssw0rd!
 @adminToken = paste-admin-token-here
-@operatorEmail = operator@ankara.local
-@userEmail = user@ankara.local
+@operatorEmail = operator@bursa.local
+@userEmail = user@bursa.local
 
 GET {{Tenant.Identity.Api_HostAddress}}/
 Accept: application/json
@@ -34,7 +34,7 @@ Content-Type: application/json
 
 {
 	"email": "{{operatorEmail}}",
-	"fullName": "Ankara Operator",
+	"fullName": "Bursa Operator",
 	"password": "P@ssw0rd!",
 	"role": "OPERATOR"
 }
@@ -47,7 +47,7 @@ Content-Type: application/json
 
 {
 	"email": "{{userEmail}}",
-	"fullName": "Ankara User",
+	"fullName": "Bursa User",
 	"password": "P@ssw0rd!",
 	"role": "USER"
 }

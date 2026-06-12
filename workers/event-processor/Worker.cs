@@ -145,10 +145,10 @@ public sealed class Worker : BackgroundService
             return;
         }
 
-        var demoTenantId = "ankara";
+        var demoTenantId = "bursa";
 
         await _eventQueue.EnqueueAsync(
-            IntegrationEvent.Create(demoTenantId, "Identity.TenantCreated", "{\"tenantName\":\"ankara\"}"),
+            IntegrationEvent.Create(demoTenantId, "Identity.TenantCreated", "{\"tenantName\":\"Bursa\"}"),
             cancellationToken);
 
         await _eventQueue.EnqueueAsync(
