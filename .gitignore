@@ -16,6 +16,7 @@ vendor/
 
 # IDE files
 .vscode/
+.vs/ 
 .idea/
 *.userprefs
 *.suo
