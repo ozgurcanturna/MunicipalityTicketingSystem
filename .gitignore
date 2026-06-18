@@ -18,6 +18,7 @@ vendor/
 .vscode/
 .vs/ 
 .idea/
+.continue/
 *.userprefs
 *.suo
 *.user

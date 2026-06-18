@@ -1,9 +1,15 @@
+using System;
+using System.Diagnostics;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using OpenTelemetry;
+using OpenTelemetry.Trace;
 using SharedKernel.Infrastructure.DependencyInjection;
+using SharedKernel.Infrastructure.Caching;
 using SharedKernel.Infrastructure.MultiTenancy;
+using StackExchange.Redis;
 using Journey.Telemetry.Api.Application.Contracts;
 using Journey.Telemetry.Api.Application.Repositories;
 using Journey.Telemetry.Api.Domain.Entities;
@@ -12,6 +18,30 @@ using Journey.Telemetry.Api.Infrastructure.Persistence;
 using Journey.Telemetry.Api.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Add OpenTelemetry for distributed tracing
+
+if (bool.Parse(builder.Configuration["OpenTelemetry:Enabled"] ?? "false"))
+{
+    builder.Services.AddOpenTelemetry()
+        .WithTracing(tracing =>
+        {
+            tracing
+                .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                    .AddService(
+                        serviceName: Environment.GetEnvironmentVariable("ASPNETCORE_SERVICE_NAME") ?? "telemetry-service",
+                        serviceVersion: builder.Configuration["App:Version"] ?? "1.0.0"))
+                .AddAspNetCoreInstrumentation()
+                .AddEntityFrameworkCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddSource("Journey.Telemetry.Api")
+                .AddOtlpExporter(options =>
+                {
+                    options.Endpoint = new Uri(builder.Configuration["OpenTelemetry:Traces:Endpoint"] ?? "http://otel-collector:4317");
+                    options.Protocol = OtlpExportProtocol.Grpc;
+                });
+        });
+}
 
 builder.Services.AddOpenApi();
 builder.Services.AddHttpContextAccessor();
@@ -43,6 +73,21 @@ builder.Services.AddAuthorization(options =>
 	options.AddPolicy("TelemetryReader", policy => policy.RequireRole("ADMIN", "OPERATOR", "USER"));
 });
 
+// Configure Redis for distributed caching
+if (bool.Parse(builder.Configuration["Redis:Enabled"] ?? "false"))
+{
+    var redisConnectionString = builder.Configuration.GetConnectionString("Redis") ?? "localhost:6379";
+    
+    builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+    {
+        var config = ConfigurationOptions.Parse(redisConnectionString);
+        config.AbortOnConnectFail = false;
+        return ConnectionMultiplexer.Connect(config);
+    });
+    
+    builder.Services.AddScoped<ITelemetryCacheService, RedisTelemetryCacheService>();
+}
+
 builder.Services.AddScoped<ITenantProvider, HttpHeaderTenantProvider>();
 builder.Services.AddSharedInfrastructure<TelemetryDbContext>(builder.Configuration);
 builder.Services.AddScoped<IJourneyRepository, JourneyRepository>();
@@ -55,6 +100,19 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthentication();
+
+// Add correlation ID middleware for distributed tracing
+app.Use(async (context, next) =>
+{
+	var correlationId = context.Request.Headers["X-Correlation-Id"].FirstOrDefault();
+	if (string.IsNullOrWhiteSpace(correlationId))
+	{
+		correlationId = Guid.NewGuid().ToString("N");
+		context.Request.Headers["X-Correlation-Id"] = correlationId;
+	}
+	context.Items["CorrelationId"] = correlationId;
+	await next();
+});
 
 app.Use(async (context, next) =>
 {

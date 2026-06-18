@@ -16,7 +16,7 @@ class SignalRService {
     this.connection = new HubConnectionBuilder()
       .withUrl(this.hubUrl, {
         accessTokenFactory: () => {
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('auth_token');
           return token || '';
         },
       })
@@ -27,7 +27,6 @@ class SignalRService {
     try {
       await this.connection.start();
       console.log('SignalR Connected');
-      return this.connection;
     } catch (err) {
       console.error('SignalR Connection Error:', err);
       throw err;

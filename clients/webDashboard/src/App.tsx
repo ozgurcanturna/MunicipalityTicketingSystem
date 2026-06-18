@@ -1,4 +1,3 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './features/auth/AuthProvider';
 import { DashboardProvider } from './features/dashboard/DashboardProvider';
@@ -13,41 +12,32 @@ import Login from './features/auth/Login';
 import RequireAuth from './components/auth/RequireAuth';
 import './index.css';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 1000 * 60 * 5, // 5 dakika
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <DashboardProvider>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route
-              path="/"
-              element={
-                <RequireAuth>
-                  <Layout />
-                </RequireAuth>
-              }
-            >
-              <Route index element={<Dashboard />} />
-              <Route path="journeys" element={<Journeys />} />
-              <Route path="buses" element={<Buses />} />
-              <Route path="reports" element={<Reports />} />
-              <Route path="users" element={<Users />} />
-              <Route path="settings" element={<Settings />} />
-            </Routes>
-          </AuthProvider>
-        </DashboardProvider>
-      </QueryClientProvider>
+    <AuthProvider>
+      <DashboardProvider>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route
+            path="/"
+            element={
+              <RequireAuth>
+                <Layout />
+              </RequireAuth>
+            }
+                    >
+            <Route index element={<Dashboard />} />
+            <Route path="journeys" element={<Journeys />} />
+            <Route path="buses" element={<Buses />} />
+            <Route path="reports" element={<Reports />} />
+            <Route path="users" element={<Users />} />
+            <Route path="settings" element={<Settings />} />
+          </Route>
+          </Routes>
+      </DashboardProvider>
+    </AuthProvider>
   );
 }
 
 export default App;
+

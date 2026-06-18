@@ -1,4 +1,4 @@
-name: municipality-ticketing
+n ame: municipality-ticketing
 
 services:
   postgres:
@@ -36,13 +36,24 @@ services:
       - municipality-net
 
   identity:
-    build:
-      context: .
-      dockerfile: services/identity/Dockerfile
-    container_name: municipality-identity
-    environment:
-      ASPNETCORE_ENVIRONMENT: Docker
-      ASPNETCORE_URLS: http://+:8080
+      build:
+        context: .
+        dockerfile: services/identity/Dockerfile
+      container_name: municipality-identity
+      environment:
+        ASPNETCORE_ENVIRONMENT: Docker
+        ASPNETCORE_URLS: http://+:8080
+        ASPNETCORE_SERVICE_NAME: identity-service
+        App:Version: 1.0.0
+        ConnectionStrings:DefaultConnection: Host=postgres;Database=MunicipalityTicketing.Default;Username=postgres;Password=Your_strong_password123!
+        ConnectionStrings:Redis: municipality-redis:6379,abortConnect=false,connectTimeout=5000
+        Redis:Enabled: true
+        Redis:Prefix: muni:
+        Redis:ConnectionString: municipality-redis:6379
+        OpenTelemetry:Enabled: true
+        OpenTelemetry:Traces:Endpoint: http://otel-collector:4317
+        OpenTelemetry:Metrics:Enabled: true
+        OpenTelemetry:Metrics:Endpoint: http://otel-collector:4317
     ports:
       - "5115:8080"
     depends_on:
@@ -56,13 +67,24 @@ services:
       - municipality-net
 
   wallet:
-    build:
-      context: .
-      dockerfile: services/wallet/Dockerfile
-    container_name: municipality-wallet
-    environment:
-      ASPNETCORE_ENVIRONMENT: Docker
-      ASPNETCORE_URLS: http://+:8080
+      build:
+        context: .
+        dockerfile: services/wallet/Dockerfile
+      container_name: municipality-wallet
+      environment:
+        ASPNETCORE_ENVIRONMENT: Docker
+        ASPNETCORE_URLS: http://+:8080
+        ASPNETCORE_SERVICE_NAME: wallet-service
+        App:Version: 1.0.0
+        ConnectionStrings:DefaultConnection: Host=postgres;Database=MunicipalityTicketing.Default;Username=postgres;Password=Your_strong_password123!
+        ConnectionStrings:Redis: municipality-redis:6379,abortConnect=false,connectTimeout=5000
+        Redis:Enabled: true
+        Redis:Prefix: muni:
+        Redis:ConnectionString: municipality-redis:6379
+        OpenTelemetry:Enabled: true
+        OpenTelemetry:Traces:Endpoint: http://otel-collector:4317
+        OpenTelemetry:Metrics:Enabled: true
+        OpenTelemetry:Metrics:Endpoint: http://otel-collector:4317
     ports:
       - "5136:8080"
     depends_on:
@@ -76,13 +98,24 @@ services:
       - municipality-net
 
   telemetry:
-    build:
-      context: .
-      dockerfile: services/telemetry/Dockerfile
-    container_name: municipality-telemetry
-    environment:
-      ASPNETCORE_ENVIRONMENT: Docker
-      ASPNETCORE_URLS: http://+:8080
+      build:
+        context: .
+        dockerfile: services/telemetry/Dockerfile
+      container_name: municipality-telemetry
+      environment:
+        ASPNETCORE_ENVIRONMENT: Docker
+        ASPNETCORE_URLS: http://+:8080
+        ASPNETCORE_SERVICE_NAME: telemetry-service
+        App:Version: 1.0.0
+        ConnectionStrings:DefaultConnection: Host=postgres;Database=MunicipalityTicketing.Default;Username=postgres;Password=Your_strong_password123!
+        ConnectionStrings:Redis: municipality-redis:6379,abortConnect=false,connectTimeout=5000
+        Redis:Enabled: true
+        Redis:Prefix: muni:
+        Redis:ConnectionString: municipality-redis:6379
+        OpenTelemetry:Enabled: true
+        OpenTelemetry:Traces:Endpoint: http://otel-collector:4317
+        OpenTelemetry:Metrics:Enabled: true
+        OpenTelemetry:Metrics:Endpoint: http://otel-collector:4317
     ports:
       - "5169:8080"
     depends_on:
@@ -96,12 +129,26 @@ services:
       - municipality-net
 
   event-processor:
-    build:
-      context: .
-      dockerfile: workers/event-processor/Dockerfile
-    container_name: municipality-event-processor
-    environment:
-      DOTNET_ENVIRONMENT: Docker
+      build:
+        context: .
+        dockerfile: workers/event-processor/Dockerfile
+      container_name: municipality-event-processor
+      environment:
+        DOTNET_ENVIRONMENT: Docker
+        ASPNETCORE_SERVICE_NAME: event-processor-worker
+        App:Version: 1.0.0
+        ConnectionStrings:DefaultConnection: Host=postgres;Database=MunicipalityTicketing.Default;Username=postgres;Password=Your_strong_password123!
+        ConnectionStrings:Redis: municipality-redis:6379,abortConnect=false,connectTimeout=5000
+        Redis:Enabled: true
+        Redis:Prefix: muni:
+        Redis:ConnectionString: municipality-redis:6379
+        OpenTelemetry:Enabled: true
+        OpenTelemetry:Traces:Endpoint: http://otel-collector:4317
+        Event:Bus:Host: rabbitmq:5672
+        Event:Bus:Username: guest
+        Event:Bus:Password: guest
+        Event:Bus:VirtualHost: /
+        Event:Bus:QueueName: municipality-events
     depends_on:
       postgres:
         condition: service_healthy
@@ -113,13 +160,20 @@ services:
       - municipality-net
 
   gateway:
-    build:
-      context: .
-      dockerfile: gateway/Dockerfile
-    container_name: municipality-gateway
-    environment:
-      ASPNETCORE_ENVIRONMENT: Docker
-      ASPNETCORE_URLS: http://+:8080
+      build:
+        context: .
+        dockerfile: gateway/Dockerfile
+      container_name: municipality-gateway
+      environment:
+        ASPNETCORE_ENVIRONMENT: Docker
+        ASPNETCORE_URLS: http://+:8080
+        ASPNETCORE_SERVICE_NAME: api-gateway
+        App:Version: 1.0.0
+        OpenTelemetry:Enabled: true
+        OpenTelemetry:Traces:Endpoint: http://otel-collector:4317
+        ReverseProxy:Routes:identity-route:ClusterId:identity-cluster
+        ReverseProxy:Routes:wallet-route:ClusterId:wallet-cluster
+        ReverseProxy:Routes:telemetry-route:ClusterId:telemetry-cluster
     ports:
       - "5197:8080"
     depends_on:
@@ -153,3 +207,22 @@ services:
 networks:
   municipality-net:
     driver: bridge
+
+# OpenTelemetry Collector for distributed tracing
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: municipality-otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"  # OTLP gRPC
+      - "4318:4318"  # OTLP HTTP
+      - "8889:8889"  # Prometheus metrics
+      - "13133:13133"  # Health check
+      - "55679:55679"  # zpages
+    depends_on:
+      - postgres
+    networks:
+      - municipality-net
+

@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAuth } from './index';
-import { Link } from 'react-router-dom';
 
 export default function Login() {
   const [username, setUsername] = useState('');

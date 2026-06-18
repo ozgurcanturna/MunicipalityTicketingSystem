@@ -1,8 +1,8 @@
 import { useDashboard } from './DashboardProvider';
-import { TrendingUp, Bus, Users, DollarSign } from 'lucide-react';
+import { TrendingUp, Bus, Users, DollarSign, RefreshCw } from 'lucide-react';
 
 export default function Dashboard() {
-  const { totalJourneys, totalBuses, totalUsers, totalRevenue } = useDashboard();
+  const { totalJourneys, totalBuses, totalUsers, totalRevenue, isLoading, error, refresh } = useDashboard();
 
   const stats = [
     {
@@ -31,11 +31,59 @@ export default function Dashboard() {
     },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <RefreshCw className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
+
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
-        Özet
-      </h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+          Özet
+        </h1>
+        <button
+          type="button"
+          onClick={refresh}
+          disabled={isLoading}
+          className="flex items-center px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+          Yenile
+        </button>
+      </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      {error && (
+        <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4 mb-6">
+          <div className="flex">
+            <div className="ml-3">
+              <h3 className="text-sm font-medium text-red-800 dark:text-red-400">
+                Hata
+              </h3>
+              <div className="mt-2 text-sm text-red-700 dark:text-red-400">
+                <p>{error}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => {
@@ -48,7 +96,7 @@ export default function Dashboard() {
           };
 
           return (
-            <div
+                        <div
               key={stat.name}
               className="overflow-hidden bg-white dark:bg-gray-800 rounded-lg shadow p-5"
             >
@@ -70,7 +118,7 @@ export default function Dashboard() {
                 </div>
               </div>
             </div>
-          );
+  );
         })}
       </div>
 
@@ -92,3 +140,4 @@ export default function Dashboard() {
     </div>
   );
 }
+

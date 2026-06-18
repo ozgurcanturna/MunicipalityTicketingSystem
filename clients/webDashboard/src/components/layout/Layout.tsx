@@ -1,6 +1,6 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../features/auth';
-import { Layout as LucideLayout, LogOut, Home, Route, Bus, BarChart3, Users, Settings } from 'lucide-react';
+import { LogOut, Home, Route, Bus, BarChart3, Users, Settings } from 'lucide-react';
 
 const navigation = [
   { name: 'Özet', href: '/', icon: Home },

@@ -1,11 +1,44 @@
+using System;
+using System.Diagnostics;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 
+
+
+
+using OpenTelemetry;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Exporter;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Add OpenTelemetry for distributed tracing
+if (bool.Parse(builder.Configuration["OpenTelemetry:Enabled"] ?? "false"))
+{
+    builder.Services.AddOpenTelemetry()
+            .WithTracing(tracing =>
+            {
+            tracing
+                .SetResourceBuilder(ResourceBuilder.CreateDefault()
+                    .AddService(
+                        serviceName: Environment.GetEnvironmentVariable("ASPNETCORE_SERVICE_NAME") ?? "api-gateway",
+                        serviceVersion: builder.Configuration["App:Version"] ?? "1.0.0"))
+                .AddAspNetCoreInstrumentation()
+                .AddHttpClientInstrumentation()
+                .AddSource("ApiGateway.Yarp")
+                .AddOtlpExporter(options =>
+                {
+                    options.Endpoint = new Uri(builder.Configuration["OpenTelemetry:Traces:Endpoint"] ?? "http://otel-collector:4317");
+                    options.Protocol = OtlpExportProtocol.Grpc;
+                });
+        });
+}
 
 builder.Services.AddOpenApi();
 builder.Services.AddReverseProxy()
@@ -64,6 +97,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthentication();
 
+// Correlation ID middleware for distributed tracing
 app.Use(async (context, next) =>
 {
 	const string correlationHeader = "X-Correlation-Id";
@@ -75,6 +109,7 @@ app.Use(async (context, next) =>
 		context.Request.Headers[correlationHeader] = correlationId;
 	}
 
+	context.Items["CorrelationId"] = correlationId;
 	context.Response.Headers[correlationHeader] = correlationId;
 	await next();
 });
