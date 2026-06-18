@@ -1,0 +1,22 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "mcp": {
+    "sequentialthinking": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ]
+    },
+    "sqlite": {
+      "type": "local",
+      "command": [
+        "uvx",
+        "mcp-server-sqlite",
+        "--db-path",
+        "d:\\LLM-MODELS\\databese.db"
+      ]
+    }
+  }
+}

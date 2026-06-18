@@ -16,8 +16,11 @@ class SignalRService {
     this.connection = new HubConnectionBuilder()
       .withUrl(this.hubUrl, {
         accessTokenFactory: () => {
-          const token = localStorage.getItem('auth_token');
-          return token || '';
+          if (typeof window === 'undefined') {
+            return '';
+          }
+
+          return window.localStorage.getItem('auth_token') || '';
         },
       })
       .withAutomaticReconnect()
@@ -28,16 +31,20 @@ class SignalRService {
       await this.connection.start();
       console.log('SignalR Connected');
     } catch (err) {
-      console.error('SignalR Connection Error:', err);
-      throw err;
+      console.warn('SignalR connection skipped:', err);
+      this.connection = null;
     }
   }
 
   async stop(): Promise<void> {
     if (this.connection) {
-      await this.connection.stop();
-      this.connection = null;
-      console.log('SignalR Disconnected');
+      try {
+        await this.connection.stop();
+      } catch (err) {
+        console.warn('SignalR disconnect failed:', err);
+      } finally {
+        this.connection = null;
+      }
     }
   }
 
@@ -57,10 +64,11 @@ class SignalRService {
     if (!this.connection) {
       throw new Error('Connection not established');
     }
+
     return await this.connection.invoke<T>(methodName, ...args);
   }
 }
 
 export const signalRHubConnection = new SignalRService(
-  `${import.meta.env.VITE_API_URL}/hubs/telemetry`
+  import.meta.env.VITE_SIGNALR_URL || `${import.meta.env.VITE_API_URL || 'http://localhost:5197'}/hubs/telemetry`
 );

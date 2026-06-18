@@ -25,7 +25,7 @@ function App() {
                 <Layout />
               </RequireAuth>
             }
-                    >
+          >
             <Route index element={<Dashboard />} />
             <Route path="journeys" element={<Journeys />} />
             <Route path="buses" element={<Buses />} />
@@ -33,11 +33,10 @@ function App() {
             <Route path="users" element={<Users />} />
             <Route path="settings" element={<Settings />} />
           </Route>
-          </Routes>
+        </Routes>
       </DashboardProvider>
     </AuthProvider>
   );
 }
 
 export default App;
-

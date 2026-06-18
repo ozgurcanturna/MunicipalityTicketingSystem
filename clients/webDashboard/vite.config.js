@@ -1,8 +1,6 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { fileURLToPath, URL } from 'node:url';
-var __dirname = fileURLToPath(new URL('.', import.meta.url));
-// Vite 6.0+ with modern optimizations
+import { fileURLToPath } from 'node:url';
 export default defineConfig({
     plugins: [react()],
     resolve: {
@@ -10,7 +8,6 @@ export default defineConfig({
             '@': fileURLToPath(new URL('./src', import.meta.url)),
         },
     },
-    // Modern build optimizations
     build: {
         minify: 'esbuild',
         sourcemap: false,
@@ -18,12 +15,11 @@ export default defineConfig({
             output: {
                 manualChunks: {
                     vendor: ['react', 'react-dom', 'react-router-dom'],
-                    'lib': ['axios', 'zustand', '@tanstack/react-query'],
+                    lib: ['axios', 'zustand', '@tanstack/react-query'],
                 },
             },
         },
     },
-    // Modern server config
     server: {
         port: 3000,
         strictPort: true,
@@ -33,11 +29,16 @@ export default defineConfig({
         },
         proxy: {
             '/api': {
-                target: 'http://localhost:5000',
+                target: 'http://localhost:5197',
+                changeOrigin: true,
+            },
+            '/hubs': {
+                target: 'http://localhost:5197',
+                ws: true,
                 changeOrigin: true,
             },
             '/signalr': {
-                target: 'http://localhost:5000',
+                target: 'http://localhost:5197',
                 ws: true,
                 changeOrigin: true,
             },

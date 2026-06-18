@@ -1,5 +1,3 @@
-// Authentication & Authorization Types
-
 export interface User {
   id: string;
   username: string;
@@ -9,21 +7,25 @@ export interface User {
   tenantId: string;
   permissions: string[];
   lastLoginAt?: string | Date;
-  createdAt: Date;
-  updatedAt?: Date;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
-export type UserRole = 'admin' | 'operator' | 'viewer';
+export type UserRole = 'admin' | 'operator' | 'viewer' | 'user';
 
 export interface LoginCredentials {
-  username: string;
+  email: string;
   password: string;
+  tenantId: string;
 }
 
 export interface AuthResponse {
   accessToken: string;
-  refreshToken: string;
-  expiresAt: number;
+  expiresAt: string | number;
+  userId: string;
+  tenantId: string;
+  email: string;
+  role: UserRole;
   user: User;
 }
 
@@ -34,14 +36,11 @@ export interface AuthState {
   tenantId: string;
 }
 
-// Token Storage
 export interface TokenStorage {
   accessToken: string;
-  refreshToken: string;
-  expiresAt: number;
+  expiresAt: string | number;
 }
 
-// Permission System
 export interface Permission {
   resource: string;
   actions: string[];

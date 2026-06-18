@@ -1,67 +1,52 @@
 import { test, expect } from '@playwright/test';
 
-/**
- * Dashboard page tests
- */
+async function login(page: import('@playwright/test').Page) {
+  await page.goto('/login');
+  await page.getByLabel('E-posta').fill('admin@bursa.local');
+  await page.getByLabel('Şifre').fill('P@ssw0rd!');
+  await page.getByRole('button', { name: 'Giriş Yap' }).click();
+  await expect(page).toHaveURL('http://localhost:3000/');
+  await expect(page.getByRole('heading', { name: 'Özet' })).toBeVisible();
+}
+
 test.describe('Dashboard', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000');
-    await page.waitForSelector('.grid', { timeout: 10000 });
+    await login(page);
   });
 
-  test('Should display dashboard layout', async ({ page }) => {
-    // Check sidebar navigation
-    await expect(page.locator('[data-testid="sidebar"]')).toBeVisible();
-    
-    // Check main content area
-    await expect(page.locator('.flex-1')).toBeVisible();
-    
-    // Check top navigation
-    await expect(page.locator('[data-testid="top-nav"]')).toBeVisible();
+  test('displays the dashboard layout', async ({ page }) => {
+    await expect(page.getByRole('navigation', { name: 'Ana menü' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Özet' })).toBeVisible();
+    await expect(page.getByText('Bursa Admin')).toBeVisible();
   });
 
-  test('Should navigate to buses page', async ({ page }) => {
-    // Click on Buses navigation item
-    await page.click('text=Büsler');
-    await page.waitForTimeout(1000);
-    
-    // Verify buses page loaded
-    await expect(page.locator('h1:has-text("Büsler")')).toBeVisible();
+  test('navigates to the buses page', async ({ page }) => {
+    await page.getByRole('link', { name: 'Otobüsler' }).click();
+    await expect(page).toHaveURL('http://localhost:3000/buses');
+    await expect(page.getByRole('heading', { name: 'Otobüs Yönetimi' })).toBeVisible();
   });
 
-  test('Should navigate to journeys page', async ({ page }) => {
-    // Click on Seferler navigation item
-    await page.click('text=Seferler');
-    await page.waitForTimeout(1000);
-    
-    // Verify journeys page loaded
-    await expect(page.locator('h1:has-text("Seferler")')).toBeVisible();
+  test('navigates to the journeys page', async ({ page }) => {
+    await page.getByRole('link', { name: 'Seferler' }).click();
+    await expect(page).toHaveURL('http://localhost:3000/journeys');
+    await expect(page.getByRole('heading', { name: 'Sefer Yönetimi' })).toBeVisible();
   });
 
-  test('Should navigate to users page', async ({ page }) => {
-    // Click on Kullanıcılar navigation item
-    await page.click('text=Kullanıcılar');
-    await page.waitForTimeout(1000);
-    
-    // Verify users page loaded
-    await expect(page.locator('h1:has-text("Kullanıcılar")')).toBeVisible();
+  test('navigates to the users page', async ({ page }) => {
+    await page.getByRole('link', { name: 'Kullanıcılar' }).click();
+    await expect(page).toHaveURL('http://localhost:3000/users');
+    await expect(page.getByRole('heading', { name: 'Kullanıcı Yönetimi' })).toBeVisible();
   });
 
-  test('Should navigate to reports page', async ({ page }) => {
-    // Click on Raporlar navigation item
-    await page.click('text=Raporlar');
-    await page.waitForTimeout(1000);
-    
-    // Verify reports page loaded
-    await expect(page.locator('h1:has-text("Raporlar")')).toBeVisible();
+  test('navigates to the reports page', async ({ page }) => {
+    await page.getByRole('link', { name: 'Raporlar' }).click();
+    await expect(page).toHaveURL('http://localhost:3000/reports');
+    await expect(page.getByRole('heading', { name: 'Raporlar ve İstatistikler' })).toBeVisible();
   });
 
-  test('Should navigate to settings page', async ({ page }) => {
-    // Click on Ayarlar navigation item
-    await page.click('text=Ayarlar');
-    await page.waitForTimeout(1000);
-    
-    // Verify settings page loaded
-    await expect(page.locator('h1:has-text("Ayarlar")')).toBeVisible();
+  test('navigates to the settings page', async ({ page }) => {
+    await page.getByRole('link', { name: 'Ayarlar' }).click();
+    await expect(page).toHaveURL('http://localhost:3000/settings');
+    await expect(page.getByRole('heading', { name: 'Ayarlar', exact: true })).toBeVisible();
   });
 });

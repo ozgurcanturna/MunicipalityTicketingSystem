@@ -24,20 +24,75 @@ interface JourneySession {
   createdAt: Date;
 }
 
+interface BackendJourneyResponse {
+  id?: string;
+  vehicleId?: string;
+  routeCode?: string;
+  isActive?: boolean;
+  passengerCount?: number;
+  currentLatitude?: number;
+  currentLongitude?: number;
+  startedAt?: string;
+  endedAt?: string | null;
+  checkpoints?: Array<{
+    id?: string;
+    eventType?: string;
+    cardId?: string | null;
+    stopCode?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    occurredAt?: string;
+  }>;
+}
+
+function mapJourneyResponse(response: BackendJourneyResponse): JourneySession {
+  const checkpoints = (response.checkpoints || []).map((checkpoint) => {
+    const mappedCheckpoint: JourneyCheckpoint = {
+      id: checkpoint.id || crypto.randomUUID(),
+      checkpointType: checkpoint.eventType === 'CHECK_OUT' ? 'alight' : checkpoint.eventType === 'CHECK_IN' ? 'board' : 'location',
+      passengerName: checkpoint.cardId || 'Sistem',
+      stopName: checkpoint.stopCode || 'Konum',
+      timestamp: new Date(checkpoint.occurredAt || response.startedAt || Date.now()),
+    };
+
+    if (checkpoint.latitude !== null && checkpoint.latitude !== undefined) {
+      mappedCheckpoint.latitude = checkpoint.latitude;
+    }
+
+    if (checkpoint.longitude !== null && checkpoint.longitude !== undefined) {
+      mappedCheckpoint.longitude = checkpoint.longitude;
+    }
+
+    return mappedCheckpoint;
+  });
+
+  return {
+    id: response.id || crypto.randomUUID(),
+    busCode: response.vehicleId || response.routeCode || 'BUR-000',
+    passengerName: `${response.passengerCount ?? 0} yolcu`,
+    boardingStop: response.currentLatitude && response.currentLongitude
+      ? `${response.currentLatitude.toFixed(4)}, ${response.currentLongitude.toFixed(4)}`
+      : 'Bilinmiyor',
+    destinationStop: response.routeCode || 'Rota',
+    checkpoints,
+    status: response.isActive === false ? 'completed' : 'active',
+    createdAt: new Date(response.startedAt || Date.now()),
+  };
+}
+
 export default function Journeys() {
-    const [journeys, setJourneys] = useState<JourneySession[]>([]);
+  const [journeys, setJourneys] = useState<JourneySession[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchJourneys = async (busCode?: string) => {
     try {
       setIsLoading(true);
-      
+
       if (busCode) {
         const response = await apiService.getActiveJourneys(busCode);
-        setJourneys(response);
+        setJourneys([mapJourneyResponse(response)]);
       } else {
-        // TODO: Add endpoint for all journeys
         setJourneys([
           {
             id: '1',
@@ -62,7 +117,7 @@ export default function Journeys() {
   };
 
   useEffect(() => {
-    fetchJourneys();
+    void fetchJourneys();
   }, []);
 
   const filteredJourneys = journeys.filter(journey =>
@@ -75,21 +130,21 @@ export default function Journeys() {
       case 'active':
         return (
           <span className="flex items-center px-2 py-1 text-xs font-semibold text-green-800 bg-green-100 dark:bg-green-900/30 dark:text-green-400 rounded-full">
-            <CheckCircle className="h-3 w-3 mr-1" />
+            <CheckCircle className="h-3 w-3 mr-1" aria-hidden="true" />
             Aktif
           </span>
         );
       case 'completed':
         return (
           <span className="flex items-center px-2 py-1 text-xs font-semibold text-blue-800 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 rounded-full">
-            <CheckCircle className="h-3 w-3 mr-1" />
+            <CheckCircle className="h-3 w-3 mr-1" aria-hidden="true" />
             Tamamlandı
           </span>
         );
       case 'cancelled':
         return (
           <span className="flex items-center px-2 py-1 text-xs font-semibold text-red-800 bg-red-100 dark:bg-red-900/30 dark:text-red-400 rounded-full">
-            <XCircle className="h-3 w-3 mr-1" />
+            <XCircle className="h-3 w-3 mr-1" aria-hidden="true" />
             İptal
           </span>
         );
@@ -104,7 +159,7 @@ export default function Journeys() {
       month: '2-digit',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
   };
 
@@ -118,19 +173,15 @@ export default function Journeys() {
 
       <div className="bg-white dark:bg-gray-800 shadow rounded-lg mb-6">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Yolcu adı veya otobüs kodu ara..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pr-4 py-2 w-full border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-                />
-              </div>
-            </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" aria-hidden="true" />
+            <input
+              type="text"
+              placeholder="Yolcu adı veya otobüs kodu ara..."
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              className="pl-10 pr-4 py-2 w-full border border-gray-300 dark:border-gray-600 rounded-md focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+            />
           </div>
         </div>
 
@@ -140,7 +191,7 @@ export default function Journeys() {
           </div>
         ) : filteredJourneys.length === 0 ? (
           <div className="p-8 text-center">
-            <Bus className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <Bus className="h-12 w-12 mx-auto text-gray-400 mb-4" aria-hidden="true" />
             <p className="text-gray-500 dark:text-gray-400">Henüz sefer kaydı yok</p>
           </div>
         ) : (
@@ -155,24 +206,24 @@ export default function Journeys() {
                         {journey.busCode}
                       </span>
                     </div>
-                    
+
                     <div className="space-y-2 text-sm">
                       <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-                        <User className="h-4 w-4" />
+                        <User className="h-4 w-4" aria-hidden="true" />
                         <span>{journey.passengerName}</span>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 gap-4 mt-3">
                         <div className="flex items-start gap-2">
-                          <MapPin className="h-4 w-4 mt-0.5 text-green-600" />
+                          <MapPin className="h-4 w-4 mt-0.5 text-green-600" aria-hidden="true" />
                           <div>
                             <p className="text-xs text-gray-500 dark:text-gray-400">Kalkış</p>
                             <p className="font-medium">{journey.boardingStop}</p>
                           </div>
                         </div>
-                        
+
                         <div className="flex items-start gap-2">
-                          <MapPin className="h-4 w-4 mt-0.5 text-red-600" />
+                          <MapPin className="h-4 w-4 mt-0.5 text-red-600" aria-hidden="true" />
                           <div>
                             <p className="text-xs text-gray-500 dark:text-gray-400">Varış</p>
                             <p className="font-medium">{journey.destinationStop}</p>
@@ -181,7 +232,7 @@ export default function Journeys() {
                       </div>
 
                       <div className="flex items-center gap-2 mt-2 text-xs text-gray-500 dark:text-gray-400">
-                        <Clock className="h-3 w-3" />
+                        <Clock className="h-3 w-3" aria-hidden="true" />
                         <span>{formatTimestamp(journey.createdAt)}</span>
                       </div>
                     </div>

@@ -1,4 +1,4 @@
-import { useDashboard } from './DashboardProvider';
+import { useDashboard } from './useDashboard';
 import { TrendingUp, Bus, Users, DollarSign, RefreshCw } from 'lucide-react';
 
 export default function Dashboard() {

@@ -1,21 +1,21 @@
-import { useState } from 'react';
+import { useState, type FormEvent } from 'react';
 import { useAuth } from './index';
 
 export default function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@bursa.local');
+  const [password, setPassword] = useState('P@ssw0rd!');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setError('');
     setIsLoading(true);
 
     try {
-      await login(username, password);
-    } catch (err) {
+      await login(email, password);
+    } catch {
       setError('Kullanıcı adı veya şifre hatalı');
     } finally {
       setIsLoading(false);
@@ -43,16 +43,16 @@ export default function Login() {
 
           <div className="space-y-4">
             <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Kullanıcı Adı
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                E-posta
               </label>
               <input
-                id="username"
-                name="username"
-                type="text"
+                id="email"
+                name="email"
+                type="email"
                 required
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               />
             </div>
@@ -67,7 +67,7 @@ export default function Login() {
                 type="password"
                 required
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) => setPassword(event.target.value)}
                 className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
               />
             </div>

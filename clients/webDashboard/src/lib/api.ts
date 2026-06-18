@@ -1,10 +1,121 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
-import type { User, AuthResponse, LoginCredentials } from '../types/auth.types';
+import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
+import type { AuthResponse, LoginCredentials, User, UserRole } from '../types/auth.types';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5197';
 
+const STORAGE_KEYS = {
+  token: 'auth_token',
+  user: 'auth_user',
+  tenant: 'auth_tenant',
+} as const;
+
+type JsonObject = Record<string, unknown>;
+
+type RetryableRequestConfig = InternalAxiosRequestConfig & {
+  _retry?: boolean;
+};
+
+interface BackendTokenResponse {
+  accessToken: string;
+  expiresAtUtc: string;
+  userId: string;
+  tenantId: string;
+  email: string;
+  role: string;
+}
+
+interface BootstrapAuthResponse {
+  token: BackendTokenResponse;
+}
+
+interface BackendCurrentUserResponse {
+  userId: string;
+  email: string;
+  name: string | null;
+  role: string;
+  tenantId: string;
+}
+
+function normalizeRole(role: string): UserRole {
+  const normalizedRole = role.toLowerCase();
+
+  if (normalizedRole === 'admin') {
+    return 'admin';
+  }
+
+  if (normalizedRole === 'operator') {
+    return 'operator';
+  }
+
+  if (normalizedRole === 'user') {
+    return 'user';
+  }
+
+  return 'viewer';
+}
+
+function createUsername(email: string): string {
+  return email.split('@')[0] ?? email;
+}
+
+function mapTokenResponse(response: BackendTokenResponse): AuthResponse {
+  const user: User = {
+    id: response.userId,
+    username: createUsername(response.email),
+    email: response.email,
+    role: normalizeRole(response.role),
+    tenantId: response.tenantId,
+    permissions: [],
+    createdAt: new Date().toISOString(),
+  };
+  user.fullName = response.email;
+
+  return {
+    accessToken: response.accessToken,
+    expiresAt: response.expiresAtUtc,
+    userId: response.userId,
+    tenantId: response.tenantId,
+    email: response.email,
+    role: user.role,
+    user,
+  };
+}
+
+function mapCurrentUserResponse(response: BackendCurrentUserResponse): User {
+  const user: User = {
+    id: response.userId,
+    username: createUsername(response.email),
+    email: response.email,
+    role: normalizeRole(response.role),
+    tenantId: response.tenantId,
+    permissions: [],
+  };
+
+  if (response.name) {
+    user.fullName = response.name;
+  }
+
+  return user;
+}
+
+function readStorageItem(key: string): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  return window.localStorage.getItem(key);
+}
+
+function removeStorageItem(key: string): void {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  window.localStorage.removeItem(key);
+}
+
 class ApiService {
-  private client: AxiosInstance;
+  private readonly client: AxiosInstance;
 
   constructor() {
     this.client = axios.create({
@@ -18,15 +129,13 @@ class ApiService {
   }
 
   private setupInterceptors(): void {
-    // Request interceptor
-    this.client.interceptors.request.use((config) => {
-      const token = localStorage.getItem('auth_token');
+    this.client.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+      const token = readStorageItem(STORAGE_KEYS.token);
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      
-      // Add tenant header if available
-      const tenantId = localStorage.getItem('auth_tenant');
+
+      const tenantId = readStorageItem(STORAGE_KEYS.tenant);
       if (tenantId) {
         config.headers['X-Tenant-Id'] = tenantId;
       }
@@ -34,63 +143,40 @@ class ApiService {
       return config;
     });
 
-    // Response interceptor for token refresh
     this.client.interceptors.response.use(
       (response) => response,
       async (error: AxiosError) => {
-        const originalRequest = error.config as any;
+        const originalRequest = error.config as RetryableRequestConfig | undefined;
 
-        // If 401 and not already retrying
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        if (error.response?.status === 401 && originalRequest && !originalRequest._retry) {
           originalRequest._retry = true;
-
-          try {
-            const refreshToken = localStorage.getItem('refresh_token');
-            if (refreshToken) {
-              const newTokens = await this.refreshToken(refreshToken);
-              
-              // Update storage
-              localStorage.setItem('auth_token', newTokens.accessToken);
-              localStorage.setItem('refresh_token', newTokens.refreshToken);
-
-              // Retry original request
-              originalRequest.headers.Authorization = `Bearer ${newTokens.accessToken}`;
-              return this.client(originalRequest);
-            }
-          } catch (refreshError) {
-            // Refresh failed, clear auth
-            this.clearAuth();
-            throw refreshError;
-          }
+          this.clearAuth();
+          return Promise.reject(error);
         }
 
         return Promise.reject(error);
-      }
+      },
     );
   }
 
-  private async refreshToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
-    const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
-      refreshToken,
-    });
-    return response.data;
+  public clearAuth(redirect = true): void {
+    removeStorageItem(STORAGE_KEYS.token);
+    removeStorageItem(STORAGE_KEYS.user);
+    removeStorageItem(STORAGE_KEYS.tenant);
+
+    if (redirect && typeof window !== 'undefined') {
+      window.location.href = '/login';
+    }
   }
 
-  public clearAuth(): void {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('refresh_token');
-    localStorage.removeItem('auth_user');
-    localStorage.removeItem('auth_tenant');
-    window.location.href = '/login';
-  }
-
-  // Auth endpoints
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
-    const response = await this.client.post<AuthResponse>('/api/identity/auth/login', {
-      ...credentials,
-      tenantId: localStorage.getItem('auth_tenant') || 'bursa',
+    const response = await this.client.post<BackendTokenResponse>('/api/identity/auth/login', {
+      tenantId: credentials.tenantId,
+      email: credentials.email,
+      password: credentials.password,
     });
-    return response.data;
+
+    return mapTokenResponse(response.data);
   }
 
   async bootstrapTenant(request: {
@@ -99,29 +185,27 @@ class ApiService {
     adminFullName: string;
     adminPassword: string;
   }): Promise<AuthResponse> {
-    const response = await this.client.post<AuthResponse>('/api/identity/auth/bootstrap', request);
-    return response.data;
+    const response = await this.client.post<BootstrapAuthResponse>('/api/identity/auth/bootstrap', request);
+    return mapTokenResponse(response.data.token);
   }
 
   async getCurrentUser(): Promise<User> {
-    const response = await this.client.get<User>('/api/identity/auth/me');
-    return response.data;
+    const response = await this.client.get<BackendCurrentUserResponse>('/api/identity/auth/me');
+    return mapCurrentUserResponse(response.data);
   }
 
-  // Tenant endpoints
   async getTenants(): Promise<User[]> {
-    const response = await this.client.get<User[]>('/api/identity/tenants');
-    return response.data;
+    return [];
   }
 
   async getTenant(id: string): Promise<User> {
-    const response = await this.client.get<User>(`/api/identity/tenants/${id}`);
-    return response.data;
+    const response = await this.client.get<BackendCurrentUserResponse>(`/api/identity/tenants/${id}`);
+    return mapCurrentUserResponse(response.data);
   }
 
   async createTenant(name: string): Promise<User> {
-    const response = await this.client.post<User>('/api/identity/tenants', { name });
-    return response.data;
+    const response = await this.client.post<BackendCurrentUserResponse>('/api/identity/tenants', { name });
+    return mapCurrentUserResponse(response.data);
   }
 
   async addUser(tenantId: string, request: {
@@ -130,87 +214,84 @@ class ApiService {
     password: string;
     role: string;
   }): Promise<User> {
-    const response = await this.client.post<User>(`/api/identity/tenants/${tenantId}/users`, request);
+    const response = await this.client.post<BackendCurrentUserResponse>(`/api/identity/tenants/${tenantId}/users`, request);
+    return mapCurrentUserResponse(response.data);
+  }
+
+  async createWallet(tenantId: string): Promise<JsonObject> {
+    const response = await this.client.post<JsonObject>('/api/wallet/wallets', { tenantId });
     return response.data;
   }
 
-  // Wallet endpoints
-  async createWallet(tenantId: string): Promise<any> {
-    const response = await this.client.post('/api/wallet/wallets', { tenantId });
+  async getWallet(walletId: string): Promise<JsonObject> {
+    const response = await this.client.get<JsonObject>(`/api/wallet/wallets/${walletId}`);
     return response.data;
   }
 
-  async getWallet(walletId: string): Promise<any> {
-    const response = await this.client.get(`/api/wallet/wallets/${walletId}`);
-    return response.data;
-  }
-
-  async topUpWallet(walletId: string, amount: number, reference: string): Promise<any> {
-    const response = await this.client.post(`/api/wallet/wallets/${walletId}/topups`, {
+  async topUpWallet(walletId: string, amount: number, reference: string): Promise<JsonObject> {
+    const response = await this.client.post<JsonObject>(`/api/wallet/wallets/${walletId}/topups`, {
       amount,
       reference,
     });
     return response.data;
   }
 
-  async spendWallet(walletId: string, amount: number, reference: string): Promise<any> {
-    const response = await this.client.post(`/api/wallet/wallets/${walletId}/spend`, {
+  async spendWallet(walletId: string, amount: number, reference: string): Promise<JsonObject> {
+    const response = await this.client.post<JsonObject>(`/api/wallet/wallets/${walletId}/spend`, {
       amount,
       reference,
     });
     return response.data;
   }
 
-  async getWalletTransactions(walletId: string): Promise<any[]> {
-    const response = await this.client.get(`/api/wallet/wallets/${walletId}/transactions`);
+  async getWalletTransactions(walletId: string): Promise<JsonObject[]> {
+    const response = await this.client.get<JsonObject[]>(`/api/wallet/wallets/${walletId}/transactions`);
     return response.data;
   }
 
-  // Journey endpoints
   async startJourney(request: {
     tenantId: string;
-    busCode: string;
-    passengerName: string;
-    boardingStop: string;
-    destinationStop: string;
-    boardingTime: Date;
-  }): Promise<any> {
-    const response = await this.client.post('/api/telemetry/journeys/start', request);
+    vehicleId: string;
+    routeCode: string;
+    latitude: number;
+    longitude: number;
+  }): Promise<JsonObject> {
+    const response = await this.client.post<JsonObject>('/api/telemetry/journeys/start', request);
     return response.data;
   }
 
-  async checkIn(journeyId: string, passengerName: string): Promise<any> {
-    const response = await this.client.post(`/api/telemetry/journeys/${journeyId}/checkin`, { passengerName });
+  async checkIn(journeyId: string, cardId: string, stopCode: string): Promise<JsonObject> {
+    const response = await this.client.post<JsonObject>(`/api/telemetry/journeys/${journeyId}/checkin`, { cardId, stopCode });
     return response.data;
   }
 
-  async checkOut(journeyId: string, passengerName: string, alightingStop: string): Promise<any> {
-    const response = await this.client.post(`/api/telemetry/journeys/${journeyId}/checkout`, { 
-      passengerName,
-      alightingStop,
+  async checkOut(journeyId: string, cardId: string, stopCode: string): Promise<JsonObject> {
+    const response = await this.client.post<JsonObject>(`/api/telemetry/journeys/${journeyId}/checkout`, {
+      cardId,
+      stopCode,
     });
     return response.data;
   }
 
-  async completeJourney(journeyId: string): Promise<any> {
-    const response = await this.client.post(`/api/telemetry/journeys/${journeyId}/complete`);
+  async completeJourney(journeyId: string): Promise<JsonObject> {
+    const response = await this.client.post<JsonObject>(`/api/telemetry/journeys/${journeyId}/complete`);
     return response.data;
   }
 
-  async getActiveJourneys(busCode: string): Promise<any[]> {
-    const response = await this.client.get(`/api/telemetry/journeys/active/${busCode}`);
+  async getActiveJourneys(busCode: string): Promise<JsonObject> {
+    const response = await this.client.get<JsonObject>(`/api/telemetry/journeys/active/${busCode}`);
     return response.data;
   }
 
   async updateLocation(journeyId: string, request: {
-    passengerName: string;
     latitude: number;
     longitude: number;
-    timestamp: Date;
-  }): Promise<any> {
-    const response = await this.client.post(`/api/telemetry/journeys/${journeyId}/location`, request);
+    source: string;
+  }): Promise<JsonObject> {
+    const response = await this.client.post<JsonObject>(`/api/telemetry/journeys/${journeyId}/locations`, request);
     return response.data;
   }
 }
 
 export const apiService = new ApiService();
+export { STORAGE_KEYS };

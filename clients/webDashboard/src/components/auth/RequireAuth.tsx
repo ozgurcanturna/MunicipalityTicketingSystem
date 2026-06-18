@@ -1,8 +1,9 @@
 import { useAuth } from '../../features/auth';
 import { Navigate } from 'react-router-dom';
+import type { ReactNode } from 'react';
 
 interface RequireAuthProps {
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 export default function RequireAuth({ children }: RequireAuthProps) {
