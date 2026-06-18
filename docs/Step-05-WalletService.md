@@ -1,9 +1,11 @@
 # Step 05: Wallet Service - Bakiye ve İşlem Yönetimi
 
 ## 🎯 Amaç
+
 Bu adımda Wallet servisi, tenant bazlı cüzdan yönetimi yapacak şekilde tamamlanır.
 
 Bu adım sonunda:
+
 - Wallet aggregate ve transaction entity modeli hazır olur.
 - WalletDbContext ve WalletRepository hazır olur.
 - Wallet API endpointleri (oluşturma, bakiye yükleme, harcama, geçmiş) çalışır.
@@ -12,6 +14,7 @@ Bu adım sonunda:
 ---
 
 ## ✅ Önkoşullar
+
 - Step 00, Step 01, Step 02, Step 03, Step 04 tamamlanmış olmalı.
 
 ---
@@ -19,28 +22,34 @@ Bu adım sonunda:
 ## 1) Domain Modeli
 
 ### 1.1 WalletAccount Aggregate
+
 Dosya: services/wallet/Domain/Entities/WalletAccount.cs
 
 Sorumluluklar:
+
 - Wallet oluşturma
 - Bakiye yükleme (TopUp)
 - Bakiye düşme (Spend)
 - İşlem listesi yönetimi
 
 İş kuralları:
+
 - Amount > 0 olmalı
 - Spend işleminde bakiye yetersizse hata dönmeli
 - Reference boş olamaz
 
 ### 1.2 WalletTransaction Entity
+
 Dosya: services/wallet/Domain/Entities/WalletTransaction.cs
 
 Her cüzdan hareketini temsil eder.
 
 ### 1.3 WalletTransactionType sabitleri
+
 Dosya: services/wallet/Domain/Entities/WalletTransactionType.cs
 
 Tipler:
+
 - TOP_UP
 - SPEND
 
@@ -49,15 +58,19 @@ Tipler:
 ## 2) Repository Sözleşmesi ve Implementasyonu
 
 ### 2.1 IWalletRepository
+
 Dosya: services/wallet/Application/Repositories/IWalletRepository.cs
 
 Ek sorgu:
+
 - TenantId üzerinden wallet bulma
 
 ### 2.2 WalletRepository
+
 Dosya: services/wallet/Infrastructure/Repositories/WalletRepository.cs
 
 Özellikler:
+
 - Wallet + Transactions eager loading
 - GetById için include
 - GetByTenantId için include
@@ -67,9 +80,11 @@ Dosya: services/wallet/Infrastructure/Repositories/WalletRepository.cs
 ## 3) Persistence Katmanı
 
 ### 3.1 WalletDbContext
+
 Dosya: services/wallet/Infrastructure/Persistence/WalletDbContext.cs
 
 Kurallar:
+
 - Wallet.TenantId unique index
 - WalletTransaction için WalletId index
 - WalletTransaction için OccurredAt index
@@ -81,11 +96,13 @@ Kurallar:
 ## 4) Multi-Tenancy Provider
 
 ### 4.1 HttpHeaderTenantProvider
+
 Dosya: services/wallet/Infrastructure/MultiTenancy/HttpHeaderTenantProvider.cs
 
 X-Tenant-Id header değerini okuyup ITenantProvider sözleşmesini doldurur.
 
 Güncel davranış:
+
 - Wallet API katmanında X-Tenant-Id header zorunludur.
 - Header eksik ise servis 400 BadRequest döner.
 
@@ -94,7 +111,9 @@ Güncel davranış:
 ## 5) API Sözleşmeleri ve Endpointler
 
 ### 5.1 Contract dosyaları
+
 Dosyalar:
+
 - services/wallet/Application/Contracts/CreateWalletRequest.cs
 - services/wallet/Application/Contracts/TopUpWalletRequest.cs
 - services/wallet/Application/Contracts/SpendRequest.cs
@@ -102,9 +121,11 @@ Dosyalar:
 - services/wallet/Application/Contracts/WalletTransactionResponse.cs
 
 ### 5.2 Program.cs endpointleri
+
 Dosya: services/wallet/Program.cs
 
 Endpointler:
+
 1. GET /
 2. POST /wallets
 3. GET /wallets/{id}
@@ -113,6 +134,7 @@ Endpointler:
 6. GET /wallets/{id}/transactions
 
 DI kayıtları:
+
 - AddSharedInfrastructure<WalletDbContext>
 - ITenantProvider -> HttpHeaderTenantProvider
 - IWalletRepository -> WalletRepository
@@ -146,21 +168,25 @@ Beklenen sonuç: tüm build/test adımları başarılı.
 ## 8) Step 06 İçin İhtiyaç Analizi (Telemetry Service)
 
 ### 8.1 Domain İhtiyaçları
+
 1. Journey aggregate
 2. VehicleLocation ve Checkpoint event modeli
 3. Rota ve durak ilişkileri
 
 ### 8.2 Altyapı İhtiyaçları
+
 1. TelemetryDbContext
 2. Geospatial veri saklama stratejisi
 3. Event stream/ingestion modeli
 
 ### 8.3 API İhtiyaçları
+
 1. Konum güncelleme endpointi
 2. Check-in/check-out endpointleri
 3. Aktif yolculuk sorgulama endpointleri
 
 ### 8.4 Riskler ve Aksiyonlar
+
 1. Risk: Yüksek frekansta konum yazımı DB'yi zorlayabilir
 Aksiyon: Batch insert veya queue tabanlı ingest planı.
 

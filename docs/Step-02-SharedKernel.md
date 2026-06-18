@@ -1,21 +1,25 @@
 # Step 02: Shared Kernel Implementation
 
 ## 🎯 Amaç
+
 Bu adımda, tüm servislerin ortak kullanacağı Shared Kernel katmanı oluşturulur. Çıktı olarak Domain ve Infrastructure katmanlarında tekrar kullanılabilir temel sınıflar, event altyapısı ve generic repository yapısı hazırlanır.
 
 ## ✅ Beklenen Çıktılar
+
 - SharedKernel.Domain projesi oluşturulmuş ve derlenebilir olmalı.
 - SharedKernel.Infrastructure projesi oluşturulmuş, Domain'e referans vermeli ve derlenebilir olmalı.
 - Entity, AggregateRoot, ValueObject, DomainEvent ve Repository altyapısı kodlanmış olmalı.
 - Solution içerisine SharedKernel projeleri eklenmiş olmalı.
 
 ## Önkoşullar
+
 - .NET 10 SDK kurulu olmalı.
 - Step 01 tamamlanmış olmalı.
 
 ## 1) Proje Yapısı
 
 ### 1.1 Hedef dizin yapısı
+
 ```text
 core/
 └── SharedKernel/
@@ -39,6 +43,7 @@ core/
 ```
 
 ### 1.2 PowerShell ile dizinleri oluşturma
+
 ```powershell
 New-Item -ItemType Directory -Force -Path core/SharedKernel/Domain/Common
 New-Item -ItemType Directory -Force -Path core/SharedKernel/Domain/Entities
@@ -51,6 +56,7 @@ New-Item -ItemType Directory -Force -Path core/SharedKernel/Infrastructure/Repos
 ## 2) SharedKernel.Domain
 
 ### 2.1 SharedKernel.Domain.csproj
+
 Dosya: core/SharedKernel/Domain/SharedKernel.Domain.csproj
 
 ```xml
@@ -83,6 +89,7 @@ Dosya: core/SharedKernel/Domain/SharedKernel.Domain.csproj
 ```
 
 ### 2.2 Entity.cs
+
 Dosya: core/SharedKernel/Domain/Entities/Entity.cs
 
 ```csharp
@@ -154,6 +161,7 @@ public abstract class Entity
 ```
 
 ### 2.3 AggregateRoot.cs
+
 Dosya: core/SharedKernel/Domain/Entities/AggregateRoot.cs
 
 ```csharp
@@ -190,6 +198,7 @@ public abstract class AggregateRoot : Entity
 ```
 
 ### 2.4 ValueObject.cs
+
 Dosya: core/SharedKernel/Domain/Common/ValueObject.cs
 
 ```csharp
@@ -228,6 +237,7 @@ public abstract class ValueObject
 ```
 
 ### 2.5 DomainEvent.cs
+
 Dosya: core/SharedKernel/Domain/Events/DomainEvent.cs
 
 ```csharp
@@ -261,6 +271,7 @@ public sealed class EntityDeletedEvent(Guid entityId) : DomainEvent
 ```
 
 ### 2.6 IRepository.cs
+
 Dosya: core/SharedKernel/Domain/Repositories/IRepository.cs
 
 ```csharp
@@ -290,6 +301,7 @@ public interface IRepository
 ## 3) SharedKernel.Infrastructure
 
 ### 3.1 SharedKernel.Infrastructure.csproj
+
 Dosya: core/SharedKernel/Infrastructure/SharedKernel.Infrastructure.csproj
 
 ```xml
@@ -326,6 +338,7 @@ Dosya: core/SharedKernel/Infrastructure/SharedKernel.Infrastructure.csproj
 ```
 
 ### 3.2 AppDbContext.cs
+
 Dosya: core/SharedKernel/Infrastructure/Persistence/AppDbContext.cs
 
 ```csharp
@@ -399,6 +412,7 @@ public abstract class AppDbContext : DbContext
 ```
 
 ### 3.3 Repository.cs
+
 Dosya: core/SharedKernel/Infrastructure/Repositories/Repository.cs
 
 ```csharp
@@ -492,6 +506,7 @@ dotnet test MunicipalityTicketing.slnx
 Step 03 ve sonrasında zorlanmamak için bu adımın üzerine aşağıdaki ihtiyaçlar netleştirilmelidir.
 
 ### 7.1 Teknik ihtiyaçlar
+
 - Her servis için kendi DbContext sınıfı (örnek: IdentityDbContext, WalletDbContext, TelemetryDbContext).
 - Her servis için ayrı connection string ve tenant çözümleme stratejisi.
 - EF Core migration stratejisi (servis bazlı migration klasörü).
@@ -499,6 +514,7 @@ Step 03 ve sonrasında zorlanmamak için bu adımın üzerine aşağıdaki ihtiy
 - Ortak error-handling ve Result pattern standardı.
 
 ### 7.2 Step 03 için minimum backlog
+
 1. SharedKernel.Infrastructure üzerine tenant-aware DbContext tabanı ekleme.
 2. Servis projelerine SharedKernel referanslarını ekleme.
 3. Identity servisinde ilk aggregate (Tenant/User) modelleme.
@@ -506,6 +522,7 @@ Step 03 ve sonrasında zorlanmamak için bu adımın üzerine aşağıdaki ihtiy
 5. İlk migration ve local çalışma doğrulaması.
 
 ### 7.3 Test ihtiyaçları
+
 1. Entity ve ValueObject eşitlik davranışı için unit test.
 2. Repository temel CRUD davranışı için integration test.
 3. AppDbContext audit alanlarının otomatik set edilmesi için test.

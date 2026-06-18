@@ -1,9 +1,11 @@
 # Step 03: Infrastructure - EF Core ve Redis Setup
 
 ## 🎯 Amaç
+
 Bu adımda SharedKernel.Infrastructure katmanı, servislerin kullanabileceği şekilde EF Core ve Redis ile genişletilir.
 
 Bu adım sonunda:
+
 - Tenant bazlı connection string çözümleme altyapısı hazır olur.
 - Ortak Infrastructure DI extension metodu hazır olur.
 - Servis projeleri SharedKernel.Infrastructure referansı alır.
@@ -12,6 +14,7 @@ Bu adım sonunda:
 ---
 
 ## ✅ Önkoşullar
+
 - Step 00 tamamlanmış olmalı.
 - Step 01 tamamlanmış olmalı.
 - Step 02 tamamlanmış olmalı.
@@ -23,11 +26,13 @@ Bu adım sonunda:
 Dosya: core/SharedKernel/Infrastructure/SharedKernel.Infrastructure.csproj
 
 ### 1.1 Yeni klasör ve derleme dahil listesi
+
 - DependencyInjection
 - MultiTenancy
 - Persistence (TenantConnectionStringResolver ile genişletildi)
 
 ### 1.2 Paketler
+
 - Microsoft.EntityFrameworkCore
 - Microsoft.EntityFrameworkCore.Relational
 - Npgsql.EntityFrameworkCore.PostgreSQL
@@ -40,6 +45,7 @@ Dosya: core/SharedKernel/Infrastructure/SharedKernel.Infrastructure.csproj
 ## 2) Tenant ve Connection String Altyapısı
 
 ### 2.1 Tenant provider sözleşmesi
+
 Dosya: core/SharedKernel/Infrastructure/MultiTenancy/ITenantProvider.cs
 
 ```csharp
@@ -57,6 +63,7 @@ public sealed class NullTenantProvider : ITenantProvider
 ```
 
 ### 2.2 Tenant connection resolver
+
 Dosya: core/SharedKernel/Infrastructure/Persistence/TenantConnectionStringResolver.cs
 
 ```csharp
@@ -162,6 +169,7 @@ public static class InfrastructureServiceCollectionExtensions
 ## 4) Servis Projelerine Infrastructure Referansı Ekle
 
 Güncellenen dosyalar:
+
 - services/identity/Tenant.Identity.Api.csproj
 - services/wallet/Ticketing.Wallet.Api.csproj
 - services/telemetry/Journey.Telemetry.Api.csproj
@@ -174,12 +182,14 @@ Her projede SharedKernel.Infrastructure project reference tanımlandı.
 ## 5) appsettings Yapılandırması
 
 Güncellenen dosyalar:
+
 - services/identity/appsettings.json
 - services/wallet/appsettings.json
 - services/telemetry/appsettings.json
 - workers/event-processor/appsettings.json
 
 Eklenen bölüm:
+
 - ConnectionStrings:Default
 - ConnectionStrings:Redis
 - ConnectionStrings:Tenants:bursa

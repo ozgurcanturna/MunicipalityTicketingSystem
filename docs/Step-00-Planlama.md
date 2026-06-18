@@ -5,16 +5,19 @@
 15 kişilik bir yazılım geliştirme ekibinin proje liderisiniz. Belediyelerde kullanılmak üzere bir otobüs biletleme sistemi geliştireceksiniz.
 
 ### Başlangıç Koşulları
+
 - **İlk Müşteriler**: 4 farklı belediye
 - **Büyüme Beklentisi**: Zamanla hızla artacak
 - **Teslimat Süresi**: 6 ay (ilk versiyon)
 
 ### Performans Gereksinimleri (Her Belediye İçin)
+
 - **Aktif Bilet Kullanımı**: 10 milyon+/gün
 - **Bilet/Kredi Satın Alma**: 100.000+/gün
 - **Otobüs Yolculuğu Takibi**: 10.000+/gün
 
 ### Kritik Kısıtlar
+
 1. **Multi-Tenancy**: Her belediye bağımsız çalışmalı
 2. **Fault Isolation**: Bir belediyedeki sorun diğerlerini etkilememeli
 3. **Zero-Downtime Deployment**: Güncellemeler sistem durdurulmadan yapılmalı
@@ -25,26 +28,31 @@
 ## 🎯 Business Requirements (İş Gereksinimleri)
 
 ### BR-001: Multi-Tenant Yapı
+
 - Her belediye kendi verisine sahip olmalı
 - Tenants arası veri sızıntısı olmamalı
 - Her tenant için ayrı ölçeklendirme yapılabilmeli
 
 ### BR-002: Yüksek Kullanılabilirlik
+
 - Sistem %99.9 uptime sağlamalı
 - Tek bir servis arızası tüm sistemi düşürmemeli
 - Otomatik recovery mekanizmaları olmalı
 
 ### BR-003: Ölçeklenebilirlik
+
 - Yatay ölçeklendirme desteklenmeli
 - Load balancing otomatik yapılmalı
 - Database sharding stratejisi olmalı
 
 ### BR-004: Güvenlik
+
 - Kullanıcı kimlik doğrulaması güvenli olmalı
 - Veriler şifrelenmeli (at-rest & in-transit)
 - Audit logging tüm kritik işlemleri kaydetmeli
 
 ### BR-005: Continuous Deployment
+
 - Blue-green veya rolling deployment desteklenmeli
 - Rollback mekanizması hızlı olmalı
 - Feature flags ile kontrollü rollout
@@ -54,36 +62,42 @@
 ## ⚙️ Functional Requirements (Fonksiyonel Gereksinimler)
 
 ### FR-001: Kullanıcı Yönetimi (Identity Service)
+
 - Kullanıcı kaydı ve girişi
 - JWT tabanlı authentication
 - Role-based access control (RBAC)
 - Şifre sıfırlama ve hesap yönetimi
 
 ### FR-002: Cüzdan İşlemleri (Wallet Service)
+
 - Bakiye sorgulama
 - Para yükleme (kredi satın alma)
 - Bilet alımında bakiye düşümü
 - İşlem geçmişi
 
 ### FR-003: Bilet Yönetimi (Ticketing Service)
+
 - Bilet oluşturma ve validasyon
 - QR kod üretimi
 - Bilet durumu takibi (aktif, kullanıldı, iptal)
 - İade ve iptal işlemleri
 
 ### FR-004: Yolculuk Takibi (Telemetry Service)
+
 - Otobüs konum takibi
 - Check-in/check-out işlemleri
 - Rota optimizasyonu
 - Gerçek zamanlı yolcu sayısı
 
 ### FR-005: Event Processing (Event Processor)
+
 - Asenkron event handling
 - Event sourcing pattern
 - Retry ve circuit breaker
 - Dead letter queue yönetimi
 
 ### FR-006: API Gateway
+
 - Request routing
 - Authentication middleware
 - Rate limiting per tenant
@@ -94,33 +108,39 @@
 ## 📊 Non-Functional Requirements (Fonksiyonel Olmayan Gereksinimler)
 
 ### NFR-001: Performance
+
 - API response time < 200ms (p95)
 - Database query time < 50ms (p95)
 - Throughput: 10K requests/second per tenant
 
 ### NFR-002: Scalability
+
 - Auto-scaling based on CPU/memory usage
 - Database connection pooling
 - Distributed caching (Redis)
 
 ### NFR-003: Reliability
+
 - Circuit breaker pattern
 - Retry with exponential backoff
 - Health checks (liveness/readiness)
 
 ### NFR-004: Security
+
 - TLS 1.3 for all communications
 - AES-256 encryption for sensitive data
 - OWASP Top 10 compliance
 - Regular security audits
 
 ### NFR-005: Observability
+
 - Structured logging (Serilog)
 - Distributed tracing (OpenTelemetry)
 - Metrics collection (Prometheus)
 - Alerting (Grafana)
 
 ### NFR-006: Maintainability
+
 - Clean architecture principles
 - DDD tactical patterns
 - Comprehensive test coverage (>80%)
@@ -131,7 +151,7 @@
 ## 🛠️ Tool Set & Teknolojiler
 
 | Kategori | Araç | Lisans | Açıklama |
-|----------|------|--------|----------|
+| ---------- | ------ | -------- | ---------- |
 | **Framework** | .NET 10 | MIT | Backend development |
 | **Message Bus** | Brighter & Darker | Apache 2.0 | Event-driven architecture |
 | **ORM** | Entity Framework Core 10 | MIT | Data persistence |
@@ -146,6 +166,7 @@
 | **Orchestration** | Docker Compose | Apache 2.0 | Local development |
 
 ### Neden Brighter & Darker?
+
 - **Domain event uyumu**: Command ve event akışlarını uygulama katmanında ayrıştırır
 - **Transport soyutlaması**: RabbitMQ gibi broker'lar alttan değiştirilebilir
 - **CQRS desteği**: Komut ve event işleme katmanlarını net ayırır

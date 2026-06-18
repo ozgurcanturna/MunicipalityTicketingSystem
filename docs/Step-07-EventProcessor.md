@@ -25,12 +25,14 @@ Bu adım sonunda:
 Dosya: workers/event-processor/Program.cs
 
 Eklenenler:
+
 1. EventProcessor options binding
 2. Queue, processed store, dead-letter store kayıtları
 3. Handler resolver kaydı
 4. Event handler kayıtları
 
 Kritik kayıtlar:
+
 - IEventQueue -> InMemoryEventQueue
 - IProcessedEventStore -> InMemoryProcessedEventStore
 - IDeadLetterStore -> InMemoryDeadLetterStore
@@ -41,9 +43,11 @@ Kritik kayıtlar:
 ## 2) Event Sözleşmeleri ve Queue
 
 ### 2.1 IntegrationEvent modeli
+
 Dosya: workers/event-processor/Events/IntegrationEvent.cs
 
 Alanlar:
+
 - EventId
 - TenantId
 - EventType
@@ -52,13 +56,16 @@ Alanlar:
 - CorrelationId
 
 ### 2.2 IEventQueue
+
 Dosya: workers/event-processor/Events/IEventQueue.cs
 
 Metotlar:
+
 - EnqueueAsync
 - DequeueAsync
 
 ### 2.3 InMemoryEventQueue
+
 Dosya: workers/event-processor/Events/InMemoryEventQueue.cs
 
 Channel tabanlı kuyruk implementasyonu.
@@ -68,16 +75,20 @@ Channel tabanlı kuyruk implementasyonu.
 ## 3) Handler Pipeline
 
 ### 3.1 Handler sözleşmesi
+
 Dosya: workers/event-processor/Processing/IIntegrationEventHandler.cs
 
 ### 3.2 Handler resolver
+
 Dosya: workers/event-processor/Processing/IEventHandlerResolver.cs
 Dosya: workers/event-processor/Processing/EventHandlerResolver.cs
 
 Resolver, EventType -> Handler map'i oluşturur.
 
 ### 3.3 Örnek handlerlar
+
 Dosyalar:
+
 - workers/event-processor/Processing/IdentityTenantCreatedEventHandler.cs
 - workers/event-processor/Processing/WalletDebitedEventHandler.cs
 - workers/event-processor/Processing/JourneyCompletedEventHandler.cs
@@ -89,17 +100,21 @@ Not: Bu adımda handlerlar log tabanlıdır; gerçek business işlemleri Step 08
 ## 4) Idempotency ve Dead-Letter
 
 ### 4.1 Processed event store
+
 Dosya: workers/event-processor/Storage/IProcessedEventStore.cs
 Dosya: workers/event-processor/Storage/InMemoryProcessedEventStore.cs
 
 Amaç:
+
 - Aynı EventId ikinci kez geldiyse atlamak
 
 ### 4.2 Dead-letter store
+
 Dosya: workers/event-processor/Storage/IDeadLetterStore.cs
 Dosya: workers/event-processor/Storage/InMemoryDeadLetterStore.cs
 
 Amaç:
+
 - Handler bulunamayan veya retry limiti aşan event'i dead-letter kuyruğuna taşımak
 
 ---
@@ -109,6 +124,7 @@ Amaç:
 Dosya: workers/event-processor/Worker.cs
 
 Akış:
+
 1. Opsiyonel demo event seed
 2. Queue'dan event çekme
 3. İdempotency kontrolü
@@ -117,6 +133,7 @@ Akış:
 6. Başarısız event'i dead-letter store'a yazma
 
 Retry davranışı:
+
 - MaxRetryCount kadar dener
 - BaseRetryDelayMs * attempt gecikmesi uygular
 
@@ -125,17 +142,21 @@ Retry davranışı:
 ## 6) Konfigürasyon
 
 ### 6.1 EventProcessorOptions
+
 Dosya: workers/event-processor/Configuration/EventProcessorOptions.cs
 
 Alanlar:
+
 - MaxRetryCount
 - BaseRetryDelayMs
 - SeedDemoEvents
 
 ### 6.2 appsettings
+
 Dosya: workers/event-processor/appsettings.json
 
 Eklenen bölüm:
+
 ```json
 "EventProcessor": {
   "MaxRetryCount": 3,
@@ -145,11 +166,13 @@ Eklenen bölüm:
 ```
 
 ### 6.3 EventBusOptions (Step 11 ile genisletme)
+
 Dosya: workers/event-processor/Configuration/EventBusOptions.cs
 
 Bu adimdaki in-memory altyapi korunurken, Step 11'de broker tabanli ortama gecis icin EventBus konfigurasyon modeli eklenmistir.
 
 Temel alanlar:
+
 - Stack (BrighterDarker)
 - Transport (InMemory, RabbitMq)
 - ExchangeName
@@ -203,18 +226,21 @@ Beklenen sonuç: build/test başarılı.
 ## 9) Step 08 İçin İhtiyaç Analizi (API Gateway)
 
 ### 9.1 İhtiyaçlar
+
 1. Gateway route tanımları (identity/wallet/telemetry)
 2. Tenant ve auth header forwarding
 3. Basit rate limiting stratejisi
 4. Correlation-id propagation
 
 ### 9.2 Teknik Backlog
+
 1. YARP route + cluster config
 2. Health endpoint routing
 3. Request/response logging middleware
 4. Gateway seviyesinde hata sözleşmesi
 
 ### 9.3 Riskler ve Aksiyonlar
+
 1. Risk: Yanlış route konfigürasyonu ile servis erişilemezliği
 Aksiyon: route integration testleri eklenmeli.
 
