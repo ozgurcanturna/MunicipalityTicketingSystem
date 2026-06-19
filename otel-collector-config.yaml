@@ -1,4 +1,4 @@
-kle receivers:
+receivers:
   otlp:
     protocols:
       grpc:

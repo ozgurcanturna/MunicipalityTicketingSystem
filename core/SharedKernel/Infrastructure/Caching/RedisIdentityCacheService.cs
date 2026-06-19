@@ -1,6 +1,4 @@
-using System.Text.Json;
 using Microsoft.Extensions.Configuration;
-using SharedKernel.Domain.Common;
 using StackExchange.Redis;
 
 namespace SharedKernel.Infrastructure.Caching;
@@ -10,88 +8,37 @@ public sealed class RedisIdentityCacheService : IIdentityCacheService
     private readonly IDatabase _database;
     private readonly string _prefix;
 
-    public RedisIdentityCacheService(IConnectionMultiplexer redis, IConfiguration configuration)
+    public RedisIdentityCacheService(IConnectionMultiplexer redis, IConfiguration config)
     {
         _database = redis.GetDatabase();
-        _prefix = configuration.GetValue<string>("Redis:Prefix") ?? "muni:";
+        _prefix = config.GetSection("Redis:Prefix").Get<string>() ?? "muni:";
     }
 
-    public async Task<bool> SetUserCacheAsync(Guid userId, string tenantId, CancellationToken cancellationToken)
+    public async Task<string?> GetTenantConfigAsync(string tenantId, CancellationToken cancellationToken = default)
     {
-        var key = $"{_prefix}user:{tenantId}:{userId}";
-        var value = JsonSerializer.Serialize(new
-        {
-            UserId = userId,
-            TenantId = tenantId,
-            CachedAt = DateTime.UtcNow
-        });
-
-        await _database.StringSetAsync(key, value, TimeSpan.FromHours(1), when: When.NotExists);
-        return true;
+        return await _database.StringGetAsync($"{_prefix}tenant:{tenantId}:config");
     }
 
-    public async Task<UserCache?> GetUserCacheAsync(Guid userId, string tenantId, CancellationToken cancellationToken)
+    public async Task SetTenantConfigAsync(string tenantId, string configJson, TimeSpan? expiration = null, CancellationToken cancellationToken = default)
     {
-        var key = $"{_prefix}user:{tenantId}:{userId}";
-        var value = await _database.StringGetAsync(key, cancellationToken: cancellationToken);
-
-        if (value.IsNullOrEmpty)
-            return null;
-
-        return JsonSerializer.Deserialize<UserCache>(value.ToString());
+        var expireTime = expiration ?? TimeSpan.FromMinutes(30);
+        await _database.StringSetAsync($"{_prefix}tenant:{tenantId}:config", configJson, expireTime, When.Always);
     }
 
-    public async Task InvalidateUserCacheAsync(Guid userId, string tenantId, CancellationToken cancellationToken)
+    public async Task<string?> GetJwtTokenAsync(string userId, string tenantId, CancellationToken cancellationToken = default)
     {
-        var key = $"{_prefix}user:{tenantId}:{userId}";
-        await _database.KeyDeleteAsync(key, cancellationToken: cancellationToken);
+        return await _database.StringGetAsync($"{_prefix}jwt:{userId}:{tenantId}");
     }
 
-    public async Task<bool> SetTenantCacheAsync(Guid tenantId, Tenant tenant, CancellationToken cancellationToken)
+    public async Task SetJwtTokenAsync(string userId, string tenantId, string token, TimeSpan? expiration = null, CancellationToken cancellationToken = default)
     {
-        var key = $"{_prefix}tenant:{tenantId}";
-        var value = JsonSerializer.Serialize(new
-        {
-            Id = tenant.Id,
-            Name = tenant.Name,
-            CreatedAt = tenant.CreatedAt,
-            Status = tenant.Status
-        });
-
-        await _database.StringSetAsync(key, value, TimeSpan.FromHours(6), when: When.NotExists);
-        return true;
+        var expireTime = expiration ?? TimeSpan.FromMinutes(60);
+        await _database.StringSetAsync($"{_prefix}jwt:{userId}:{tenantId}", token, expireTime, When.Always);
     }
 
-    public async Task<Tenant?> GetTenantCacheAsync(Guid tenantId, CancellationToken cancellationToken)
+    public async Task InvalidateTenantCacheAsync(string tenantId, CancellationToken cancellationToken = default)
     {
-        var key = $"{_prefix}tenant:{tenantId}";
-        var value = await _database.StringGetAsync(key, cancellationToken: cancellationToken);
-
-        if (value.IsNullOrEmpty)
-            return null;
-
-        return JsonSerializer.Deserialize<Tenant>(value.ToString());
+        var pattern = $"{_prefix}tenant:{tenantId}:*";
+        await _database.KeyDeleteAsync(pattern);
     }
-
-    public async Task InvalidateTenantCacheAsync(Guid tenantId, CancellationToken cancellationToken)
-    {
-        var key = $"{_prefix}tenant:{tenantId}";
-        await _database.KeyDeleteAsync(key, cancellationToken: cancellationToken);
-    }
-}
-
-public sealed class UserCache
-{
-    public Guid UserId { get; set; }
-    public Guid TenantId { get; set; }
-    public DateTime CachedAt { get; set; }
-}
-
-public sealed class Tenant
-{
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public DateTime CreatedAt { get; set; }
-    public string Status { get; set; } = string.Empty;
-}
 }

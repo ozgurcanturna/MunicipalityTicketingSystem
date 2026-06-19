@@ -1,76 +1,18 @@
-using System;
+using StackExchange.Redis;
 
 namespace SharedKernel.Infrastructure.Caching;
 
-/// <summary>
-/// Interface for distributed caching service in Telemetry service
-/// </summary>
 public interface ITelemetryCacheService
 {
-    /// <summary>
-    /// Get active journey for vehicle
-    /// </summary>
-    Task<string?> GetActiveJourneyAsync(string vehicleId, CancellationToken cancellationToken = default);
-    
-    /// <summary>
-    /// Set active journey in cache
-    /// </summary>
-    Task SetActiveJourneyAsync(string vehicleId, string journeyJson, TimeSpan? expiration = null, CancellationToken cancellationToken = default);
-    
-    /// <summary>
-    /// Invalidate active journey cache for vehicle
-    /// </summary>
-    Task InvalidateActiveJourneyAsync(string vehicleId, CancellationToken cancellationToken = default);
-    
-    /// <summary>
-    /// Get journey checkpoints cache
-    /// </summary>
-    Task<string?> GetJourneyCheckpointsAsync(string journeyId, CancellationToken cancellationToken = default);
-    
-    /// <summary>
-    /// Set journey checkpoints in cache
-    /// </summary>
-    Task SetJourneyCheckpointsAsync(string journeyId, string checkpointsJson, TimeSpan? expiration = null, CancellationToken cancellationToken = default);
-}
+    Task<bool> SetJourneyCacheAsync(Guid journeyId, string tenantId, CancellationToken cancellationToken);
 
-/// <summary>
-/// Redis implementation of ITelemetryCacheService
-/// </summary>
-public sealed class RedisTelemetryCacheService : ITelemetryCacheService
-{
-    private readonly IDatabase _database;
-    private readonly string _prefix;
+    Task<JourneyCache?> GetJourneyCacheAsync(Guid journeyId, string tenantId, CancellationToken cancellationToken);
 
-    public RedisTelemetryCacheService(IConnectionMultiplexer redis, IConfiguration config)
-    {
-        _database = redis.GetDatabase();
-        _prefix = config.GetSection("Redis:Prefix").Get<string>() ?? "muni:";
-    }
+    Task InvalidateJourneyCacheAsync(Guid journeyId, string tenantId, CancellationToken cancellationToken);
 
-    public async Task<string?> GetActiveJourneyAsync(string vehicleId, CancellationToken cancellationToken = default)
-    {
-        return await _database.StringGetAsync($"{_prefix}journey:active:{vehicleId}", cancellationToken);
-    }
+    Task<bool> SetVehicleStatusCacheAsync(string vehicleId, string tenantId, string status, CancellationToken cancellationToken);
 
-    public async Task SetActiveJourneyAsync(string vehicleId, string journeyJson, TimeSpan? expiration = null, CancellationToken cancellationToken = default)
-    {
-        var expireTime = expiration ?? TimeSpan.FromMinutes(30);
-        await _database.StringSetAsync($"{_prefix}journey:active:{vehicleId}", journeyJson, expireTime, When.Always, cancellationToken);
-    }
+    Task<string?> GetVehicleStatusCacheAsync(string vehicleId, string tenantId, CancellationToken cancellationToken);
 
-    public async Task InvalidateActiveJourneyAsync(string vehicleId, CancellationToken cancellationToken = default)
-    {
-        await _database.KeyDeleteAsync($"{_prefix}journey:active:{vehicleId}", cancellationToken);
-    }
-
-    public async Task<string?> GetJourneyCheckpointsAsync(string journeyId, CancellationToken cancellationToken = default)
-    {
-        return await _database.StringGetAsync($"{_prefix}journey:{journeyId}:checkpoints", cancellationToken);
-    }
-
-    public async Task SetJourneyCheckpointsAsync(string journeyId, string checkpointsJson, TimeSpan? expiration = null, CancellationToken cancellationToken = default)
-    {
-        var expireTime = expiration ?? TimeSpan.FromHours(1);
-        await _database.StringSetAsync($"{_prefix}journey:{journeyId}:checkpoints", checkpointsJson, expireTime, When.Always, cancellationToken);
-    }
+    Task InvalidateVehicleStatusCacheAsync(string vehicleId, string tenantId, CancellationToken cancellationToken);
 }

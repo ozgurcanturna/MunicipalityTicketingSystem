@@ -155,18 +155,31 @@ public Result<Ticket> PurchaseTicket(CreateTicketRequest request)
 
 ## 7. Technology Stack
 
-| Category | Tool | Purpose |
-| ---------- | ------ | --------- |
-| Framework | .NET 10 | Backend runtime |
-| Messaging | Brighter & Darker + RabbitMQ transport | CQRS, event-driven |
-| ORM | EF Core 10 | Data persistence |
-| Cache | StackExchange.Redis | Distributed caching |
-| Validation | FluentValidation | Request validation |
-| Logging | Serilog | Structured logging |
-| Tracing | OpenTelemetry | Distributed tracing |
-| Gateway | YARP | Reverse proxy & routing |
-| Testing | xUnit, Moq, Shouldly | Unit & integration tests |
-| Container | Docker & Docker Compose | Containerization |
+### Mevcut MVP'de Kullanılanlar
+
+| Category | Tool | Purpose | Status |
+| ---------- | ------ | --------- | ------ |
+| Framework | .NET 10 | Backend runtime | ✅ Active |
+| ORM | EF Core 10 | Data persistence | ✅ Active |
+| Cache | StackExchange.Redis | Distributed caching | ✅ Active |
+| Gateway | YARP | Reverse proxy | ✅ Active |
+| Testing | xUnit, Moq, Shouldly | Unit & integration tests | ✅ Active |
+| Container | Docker & Docker Compose | Containerization | ✅ Active |
+| Messaging | In-Memory EventQueue | MVP placeholder | ⚠️ Not RabbitMQ |
+| Tracing | OpenTelemetry | Traces only (no metrics) | ⚠️ Partial |
+
+### Hedef/Roadmap'te Uygulanacaklar
+
+| Category | Tool | Purpose | Status |
+| ---------- | ------ | --------- | ------ |
+| Messaging | Brighter & Darker + RabbitMQ | CQRS, event-driven | 🕐 Planned |
+| Validation | FluentValidation | Request validation | 🕐 Planned |
+| Logging | Serilog | Structured logging | 🕐 Planned |
+| Metrics | OpenTelemetry + Prometheus | Metrics collection | 🕐 Planned |
+| Monitoring | Grafana | Alerting & dashboards | 🕐 Planned |
+| Tracing Backend | Jaeger/Tempo | Trace storage | 🕐 Planned |
+| Resilience | Polly | Circuit breaker, retry | 🕐 Planned |
+| Mapping | AutoMapper | DTO mapping | 🕐 Planned |
 
 ---
 
@@ -224,6 +237,8 @@ Development follows numbered step documents in `docs/`:
 | 09 | Testing |
 | 10 | Simulation Clients |
 | 11 | Docker & Deployment |
+| 12 | JWT Authentication & RBAC |
+| 13 | Web Dashboard |
 
 > **Rule**: Execute steps sequentially. Do NOT skip ahead. Each step builds on the previous one.
 

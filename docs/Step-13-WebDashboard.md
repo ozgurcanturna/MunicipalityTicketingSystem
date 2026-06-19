@@ -2,10 +2,37 @@
 
 > **Amaç**: Belediye operatörleri ve yöneticileri için merkezi yönetim paneli  
 > **Teknoloji**: React 19 + TypeScript + Vite  
-> **Runtime**: Node.js 22+  
-> **İletişim**: REST API + WebSocket (real-time)
+> **Runtime**: Node.js 20+  
+> **İletişim**: REST API + WebSocket (real-time)  
+> **Durum**: 🟡 MVP tamamlandı; production-ready hedefler roadmap’de
 
 ---
+
+## 📌 Mevcut MVP Durumu
+
+Bu dokümandaki UI/UX, auth ve API stratejileri hedef tasarımı anlatır. Kod tarafındaki mevcut MVP kapsamı daha sınırlıdır:
+
+### Şu an kodda bulunanlar
+
+- React 19 + TypeScript + Vite kurulumu
+- Login sayfası ve protected routing
+- Layout/sidebar/header yapısı
+- Dashboard, journeys, buses, reports, users, settings placeholder sayfaları
+- Axios tabanlı API client taslağı
+- SignalR bağlantı başlatma entegrasyonu
+- Playwright Chromium E2E testleri
+
+### Henüz roadmap’de kalanlar
+
+- shadcn/ui kurulumu
+- React Hook Form + Zod validation
+- httpOnly cookie token storage
+- refresh token akışı
+- gerçek dashboard API entegrasyonu
+- gerçek kullanıcı/bilet/rota/filo modülleri
+- production-ready RBAC route koruması
+- lazy loading/code splitting ve bundle optimization
+
 
 ## 📋 Gereksinimler Özeti
 
@@ -188,7 +215,9 @@
 
 ---
 
-## 📁 Proje Yapısı
+## 📁 Hedef Proje Yapısı
+
+> Not: Aşağıdaki yapı hedef dashboard mimarisini gösterir. Mevcut MVP’de bazı klasörler ve modüller henüz oluşmamıştır.
 
 ```text
 web-dashboard/
@@ -951,9 +980,11 @@ VITE_APP_VERSION=1.0.0
 - [Step-00-Planlama.md](./Step-00-Planlama.md) - Genel proje gereksinimleri
 - [skills.md](./skills.md) - Proje kuralları ve standartlar
 - [Step-08-ApiGateway.md](./Step-08-ApiGateway.md) - API Gateway yapılandırması
+- [../../clients/webDashboard/README.md](../../clients/webDashboard/README.md) - Web Dashboard kurulum ve komutlar
+- [../../clients/webDashboard/PROJECT_ANALYSIS.md](../../clients/webDashboard/PROJECT_ANALYSIS.md) - Mevcut dashboard analiz raporu
 
 ---
 
-**Doküman Durumu**: ✅ Planlama Tamamlandı  
-**Son Güncelleme**: 18.06.2026  
+**Doküman Durumu**: 🟡 MVP Tamamlandı; hedef UI/auth/API roadmap devam ediyor  
+**Son Güncelleme**: 19.06.2026  
 **Yazar**: Özgür Can TURNA

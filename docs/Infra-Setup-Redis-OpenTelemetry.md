@@ -29,7 +29,7 @@ This document describes the Redis and OpenTelemetry infrastructure added to the 
 - `gateway/Program.cs` - Added OpenTelemetry
 - `workers/event-processor/Program.cs` - Added OpenTelemetry
 - `docker-compose.yml` - Added OpenTelemetry collector service + environment variables
-- `gateway/YarpRoutes.json` - YARP reverse proxy configuration
+- `gateway/appsettings.json` - YARP reverse proxy configuration
 - `otel-collector-config.yaml` - OpenTelemetry Collector configuration
 
 ## Configuration
@@ -67,14 +67,17 @@ This document describes the Redis and OpenTelemetry infrastructure added to the 
 
 ```bash
 # Start all services with Docker Compose
-docker-compose up -d
+docker compose up -d --build
+
+# Validate compose syntax
+docker compose config --quiet
 
 # View services
-docker-compose ps
+docker compose ps
 
 # View logs
-docker-compose logs -f identity
-docker-compose logs -f otel-collector
+docker compose logs -f identity
+docker compose logs -f otel-collector
 ```
 
 ### Redis Cache Usage
@@ -111,8 +114,8 @@ Traces are automatically collected for:
 ## OpenTelemetry Collector
 
 The collector receives traces and metrics from all services, then exports to:
-- Console (development)
-- Jaeger/Tempo (production - configurable)
+- Console/logging exporter in development
+- OTLP endpoint configured in `otel-collector-config.yaml`
 
 **Access Points**:
 - gRPC: `localhost:4317`
@@ -122,16 +125,18 @@ The collector receives traces and metrics from all services, then exports to:
 
 ## YARP Gateway Configuration
 
-Routes are configured in `gateway/YarpRoutes.json`:
+Routes are configured in `gateway/appsettings.json`:
 - `/api/identity/*` → Identity Service
 - `/api/wallet/*` → Wallet Service
 - `/api/telemetry/*` → Telemetry Service
 
+`gateway/YarpRoutes.json` is a legacy/reference route file and is not loaded by the current gateway startup.
+
 ## Next Steps
 
-1. Add Jaeger/Tempo backend for production tracing
+1. Add Jaeger/Tempo backend and wire `otel-collector-config.yaml` to it
 2. Configure Redis connection pooling
-3. Add metrics dashboards for Grafana
+3. Add metrics dashboards for Grafana/Prometheus
 4. Implement Redis-based distributed session management
 5. Add health checks for Redis and OTLP endpoints
 
@@ -140,7 +145,7 @@ Routes are configured in `gateway/YarpRoutes.json`:
 ### Redis Connection Issues
 ```bash
 # Check Redis container is running
-docker-compose ps | grep redis
+docker compose ps | Select-String redis
 
 # Test connection
 docker exec -it municipality-redis redis-cli ping
@@ -149,10 +154,10 @@ docker exec -it municipality-redis redis-cli ping
 ### OpenTelemetry Issues
 ```bash
 # Check collector logs
-docker-compose logs -f otel-collector
+docker compose logs -f otel-collector
 
 # Verify endpoints are accessible
-curl http://localhost:4317
+curl http://localhost:4318
 ```
 
 ---

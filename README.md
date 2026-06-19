@@ -15,31 +15,79 @@ Belediyeler için geliştirilen yüksek ölçeklenebilir, multi-tenant otobüs b
 
 ---
 
-## 🏗️ Mimari
+## 🏗️ Current MVP Architecture
+
+```mermaid
+graph TB
+    subgraph "Client Layer"
+        Web[Web Dashboard<br/>MVP Placeholder]
+    end
+
+    subgraph "API Gateway"
+        YARP[YARP API Gateway<br/>JWT auth, rate limit]
+    end
+
+    subgraph "Microservices"
+        Identity[Tenant.Identity.Api<br/>User Management]
+        Wallet[Ticketing.Wallet.Api<br/>Balance & Payments]
+        Telemetry[Journey.Telemetry.Api<br/>Location Tracking]
+    end
+
+    subgraph "Infrastructure"
+        Redis[Redis Cache]
+        OTel[OpenTelemetry Collector]
+    end
+
+    subgraph "Data Store"
+        DB1[(MunicipalityTicketing.Default<br/>Single DB)]
+    end
+
+    subgraph "Messaging (Not Used)"
+        RabbitMQ[RabbitMQ Container<br/>Idle]
+    end
+
+    Web --> YARP
+    YARP --> Identity
+    YARP --> Wallet
+    YARP --> Telemetry
+    Identity --> Redis
+    Wallet --> Redis
+    Telemetry --> Redis
+    Identity --> DB1
+    Wallet --> DB1
+    Telemetry --> DB1
+    RabbitMQ -.-> EventProc[Event Processor<br/>In-Memory Queue]
+```
+
+> **Note**: The Event Processor worker runs but uses `InMemoryEventQueue` only. RabbitMQ is defined in compose but not connected to services.
+
+---
+
+## 🏗️ Target Architecture
 
 ```mermaid
 graph TB
     subgraph "Client Layer"
         Mobile[Mobile App]
-        Web[Web Dashboard]
+        Web[Web Dashboard<br/>React 19 + RBAC]
         Simulator[Simulation Client]
     end
 
     subgraph "API Gateway"
-        YARP[YARP API Gateway]
+        YARP[YARP API Gateway<br/>CORS, rate limit, routing]
     end
 
     subgraph "Microservices"
-        Identity[Tenant.Identity.Api]
-        Wallet[Ticketing.Wallet.Api]
-        Telemetry[Journey.Telemetry.Api]
-        EventProc[Journey.EventProcessor.Worker]
+        Identity[Tenant.Identity.Api<br/>User Management]
+        Wallet[Ticketing.Wallet.Api<br/>Balance & Payments]
+        Telemetry[Journey.Telemetry.Api<br/>Location Tracking]
+        Ticketing[Ticketing.Service<br/>Ticket Lifecycle]
     end
 
     subgraph "Infrastructure"
         Redis[Redis Cache]
         MessageBus[Brighter & Darker<br/>RabbitMQ transport]
-        OTel[OpenTelemetry]
+        OTel[OpenTelemetry<br/>+ Jaeger/Prometheus/Grafana]
     end
 
     subgraph "Data Stores (Per Tenant)"
@@ -55,18 +103,22 @@ graph TB
     YARP --> Identity
     YARP --> Wallet
     YARP --> Telemetry
+    YARP --> Ticketing
     Identity --> Redis
     Wallet --> Redis
     Telemetry --> Redis
     Identity --> MessageBus
     Wallet --> MessageBus
     Telemetry --> MessageBus
-    MessageBus --> EventProc
+    Ticketing --> MessageBus
+    MessageBus --> EventProc[Journey.EventProcessor.Worker]
     Identity --> DB1 & DB2 & DB3 & DB4
     Wallet --> DB1 & DB2 & DB3 & DB4
     Telemetry --> DB1 & DB2 & DB3 & DB4
-    EventProc --> DB1 & DB2 & DB3 & DB4
+    Ticketing --> DB1 & DB2 & DB3 & DB4
 ```
+
+> **Target**: Database-per-Tenant, Ticketing Service, real RabbitMQ transport, full observability stack.
 
 ---
 
@@ -91,13 +143,13 @@ graph TB
 
 Bu repo Step 01-11 icin teknik bir MVP akisi sunar. Ancak Step dokumanlarinda tanimlanan tum business/hedef gereksinimleri henuz tam olarak production seviyesinde tamamlanmamistir.
 
-### Su an kodda bulunanlar
+### Şu an kodda bulunanlar
 
 - Shared Kernel + EF Core + Redis tabanli altyapi
 - Identity/Wallet/Telemetry minimal endpointleri ve temel domain kurallari
 - Identity bootstrap + JWT login + BCrypt password hashing + rol bazli endpoint korumalari + Bursa/Eskişehir/Van/Mersin demo tenant/user seed
 - Gateway katmaninda merkezi JWT dogrulamasi ve tenant-claim kontrolu
-- Event processor (Brighter & Darker stack, RabbitMQ transport, retry, dead-letter, idempotency)
+- Event processor **MVP sürümünde In-Memory EventQueue kullanıyor**; RabbitMQ transport hedef ama compose'ta hazir (henuz consumer/producer entegrasyonu yok)
 - YARP gateway routing + tenant header zorunlulugu + basic rate limit
 - Unit ve integration testlerin temel kapsami
 - Docker compose ile lokal ortam kurulumu
@@ -106,9 +158,10 @@ Bu repo Step 01-11 icin teknik bir MVP akisi sunar. Ancak Step dokumanlarinda ta
 
 - JWT authentication ve RBAC (FR-001) icin Bursa, Eskişehir, Van ve Mersin demo seed, temel roller ve ornek kullanicilar eklendi; admin/provisioning arayuzleri ve production hardening devam ediyor
 - Bilet yonetimi (FR-003: QR, iade/iptal, ticket lifecycle) ayri bir servis olarak uygulanmadi
-- Brighter & Darker domain event katmani kullaniliyor; RabbitMQ transport compose ve appsettings tarafinda tanimli, producer/consumer hardening devam ediyor
-- Serilog/OpenTelemetry/Prometheus/Grafana gozlemlenebilirlik zinciri tam entegre degil
+- Brighter & Darker domain event katmani kullaniliyor; RabbitMQ transport compose ve appsettings tarafinda tanimli ama **producer/consumer entegrasyonu MVP sürümünde yok**
+- Serilog/OpenTelemetry/Prometheus/Grafana gozleme zincirinden sadece OpenTelemetry temel trace aktif; Serilog logger, Prometheus/Grafana/Jaeger hedef ama kod/pipeline seviyesinde tam uygulanmadi
 - CI/CD, zero-downtime deployment ve feature flag gibi operasyonel hedefler dokumante ama kod/pipeline seviyesinde tam uygulanmadi
+- Database-per-tenant hedefi dokumande var ama Docker ortaminda henuz uygulanmadi (tek `MunicipalityTicketing.Default` DB kullaniliyor)
 
 Not: Step durumlarinin "tamamlandi" olmasi, adim bazli MVP tesliminin tamamlandigini ifade eder; tum BR/FR/NFR hedeflerinin production-hardening seviyesinde bittiği anlamina gelmez.
 
@@ -118,6 +171,9 @@ Not: Step durumlarinin "tamamlandi" olmasi, adim bazli MVP tesliminin tamamlandi
 
 ```text
 MunicipalityTicketing/
+├── aspire/                          # .NET Aspire orchestration
+│   ├── AppHost/                     # Distributed application orchestrator
+│   └── ServiceDefaults/             # Shared service configuration
 ├── core/                          # Shared Kernel
 │   └── SharedKernel/
 │       ├── Domain/                # Base classes, interfaces
@@ -171,30 +227,41 @@ MunicipalityTicketing/
 | [docs/Step-10-SimulationClients.md](docs/Step-10-SimulationClients.md) | Simulator ile gateway uzerinden yuk testi adımları |
 | [docs/Step-11-DockerDeployment.md](docs/Step-11-DockerDeployment.md) | Docker compose kurulumu ve event bus deployment adımları |
 | [docs/Step-12-AuthAndRbac.md](docs/Step-12-AuthAndRbac.md) | JWT authentication, rol tabanli yetkilendirme ve tenant-claim eslestirme |
+| [docs/Step-13-WebDashboard.md](docs/Step-13-WebDashboard.md) | React 19 web yönetim paneli, mevcut MVP ve roadmap |
+| [clients/webDashboard/README.md](clients/webDashboard/README.md) | Web Dashboard kurulum ve geliştirme komutları |
 
 ---
 
 ## 🚀 Başlangıç
 
-### Gereksinimler
+### Gereksinimmler
 
 - .NET 10 SDK
 - Docker & Docker Compose
 - Git
 
-### Kurulum (Yakında)
+### Aspire Orchestration (Önerilen)
 
 ```bash
 # Clone repository
 git clone <repo-url>
 cd MunicipalityTicketing
 
+# Run with .NET Aspire (automatic container orchestration)
+dotnet run --project aspire/AppHost/AppHost.csproj
+```
+
+### Docker Compose (Alternatif)
+
+```bash
 # Build solution
-dotnet build
+dotnet build MunicipalityTicketing.slnx
 
 # Run with Docker Compose
-docker-compose up -d
+docker compose up -d --build
 ```
+
+Aspire, servis bağımlılıklarını, ortam değişkenlerini ve container'ları otomatik olarak yönetir. Dashboard üzerinden tracing, metrics ve logs izlenebilir.
 
 ---
 
@@ -226,6 +293,7 @@ Proje tamamlandığında simulation client'ları ile aşağıdaki senaryolar tes
 | 10 | Simulation Clients | ✅ MVP Tamamlandı |
 | 11 | Docker & Deployment | ✅ MVP Tamamlandı |
 | 12 | JWT Authentication & RBAC | ✅ MVP Tamamlandı |
+| 13 | Web Dashboard | 🟡 MVP Tamamlandı |
 
 ---
 

@@ -1,15 +1,10 @@
 using System;
-using System.Diagnostics;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using OpenTelemetry;
-using OpenTelemetry.Trace;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Exporter;
 using SharedKernel.Infrastructure.DependencyInjection;
 using SharedKernel.Infrastructure.Caching;
 using StackExchange.Redis;
@@ -26,29 +21,11 @@ using Tenant.Identity.Api.Infrastructure.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add OpenTelemetry for distributed tracing
+// Add ServiceDefaults (Aspire integration)
+builder.AddServiceDefaults();
 
-if (bool.Parse(builder.Configuration["OpenTelemetry:Enabled"] ?? "false"))
-{
-    builder.Services.AddOpenTelemetry()
-        .WithTracing(tracing =>
-        {
-            tracing
-                .SetResourceBuilder(ResourceBuilder.CreateDefault()
-                    .AddService(
-                        serviceName: Environment.GetEnvironmentVariable("ASPNETCORE_SERVICE_NAME") ?? "identity-service",
-                        serviceVersion: builder.Configuration["App:Version"] ?? "1.0.0"))
-                .AddAspNetCoreInstrumentation()
-                .AddEntityFrameworkCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddSource("Tenant.Identity.Api")
-                .AddOtlpExporter(options =>
-                {
-                    options.Endpoint = new Uri(builder.Configuration["OpenTelemetry:Traces:Endpoint"] ?? "http://otel-collector:4317");
-                    options.Protocol = OtlpExportProtocol.Grpc;
-                });
-        });
-}
+// OpenTelemetry is now handled by ServiceDefaults
+// Custom OTEL configuration removed - use OTEL_EXPORTER_OTLP_ENDPOINT env var
 
 builder.Services.AddOpenApi();
 builder.Services.AddHttpContextAccessor();
@@ -318,5 +295,8 @@ app.MapGet("/auth/me", (
 		role = user.FindFirstValue(ClaimTypes.Role),
 		tenantId = user.FindFirstValue("tenant_id")
 	})).RequireAuthorization("AuthenticatedUser");
+
+// Map health check endpoints (via ServiceDefaults)
+app.MapDefaultEndpoints();
 
 app.Run();

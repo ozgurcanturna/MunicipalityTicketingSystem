@@ -1,11 +1,8 @@
 using System;
-using System.Diagnostics;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
-using OpenTelemetry;
-using OpenTelemetry.Trace;
 using SharedKernel.Infrastructure.DependencyInjection;
 using SharedKernel.Infrastructure.Caching;
 using SharedKernel.Infrastructure.MultiTenancy;
@@ -19,29 +16,8 @@ using Journey.Telemetry.Api.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add OpenTelemetry for distributed tracing
-
-if (bool.Parse(builder.Configuration["OpenTelemetry:Enabled"] ?? "false"))
-{
-    builder.Services.AddOpenTelemetry()
-        .WithTracing(tracing =>
-        {
-            tracing
-                .SetResourceBuilder(ResourceBuilder.CreateDefault()
-                    .AddService(
-                        serviceName: Environment.GetEnvironmentVariable("ASPNETCORE_SERVICE_NAME") ?? "telemetry-service",
-                        serviceVersion: builder.Configuration["App:Version"] ?? "1.0.0"))
-                .AddAspNetCoreInstrumentation()
-                .AddEntityFrameworkCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddSource("Journey.Telemetry.Api")
-                .AddOtlpExporter(options =>
-                {
-                    options.Endpoint = new Uri(builder.Configuration["OpenTelemetry:Traces:Endpoint"] ?? "http://otel-collector:4317");
-                    options.Protocol = OtlpExportProtocol.Grpc;
-                });
-        });
-}
+// Add ServiceDefaults (Aspire integration)
+builder.AddServiceDefaults();
 
 builder.Services.AddOpenApi();
 builder.Services.AddHttpContextAccessor();
@@ -274,5 +250,8 @@ app.MapGet("/journeys/active/{vehicleId}", async (
 	var journey = await journeyRepository.GetActiveByVehicleIdAsync(vehicleId.Trim(), cancellationToken);
 	return journey is null ? Results.NotFound() : Results.Ok(JourneySessionResponse.FromDomain(journey));
 }).RequireAuthorization("TelemetryReader");
+
+// Map health check endpoints (via ServiceDefaults)
+app.MapDefaultEndpoints();
 
 app.Run();

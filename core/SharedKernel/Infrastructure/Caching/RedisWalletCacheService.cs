@@ -33,7 +33,7 @@ public sealed class RedisWalletCacheService : IWalletCacheService
     public async Task<WalletCache?> GetWalletCacheAsync(Guid walletId, string tenantId, CancellationToken cancellationToken)
     {
         var key = $"{_prefix}wallet:{tenantId}:{walletId}";
-        var value = await _database.StringGetAsync(key, cancellationToken: cancellationToken);
+        var value = await _database.StringGetAsync(key);
 
         if (value.IsNullOrEmpty)
             return null;
@@ -44,7 +44,7 @@ public sealed class RedisWalletCacheService : IWalletCacheService
     public async Task InvalidateWalletCacheAsync(Guid walletId, string tenantId, CancellationToken cancellationToken)
     {
         var key = $"{_prefix}wallet:{tenantId}:{walletId}";
-        await _database.KeyDeleteAsync(key, cancellationToken: cancellationToken);
+        await _database.KeyDeleteAsync(key);
     }
 
     public async Task<bool> SetBalanceCacheAsync(string tenantId, decimal balance, CancellationToken cancellationToken)
@@ -64,7 +64,7 @@ public sealed class RedisWalletCacheService : IWalletCacheService
     public async Task<decimal?> GetBalanceCacheAsync(string tenantId, CancellationToken cancellationToken)
     {
         var key = $"{_prefix}wallet:balance:{tenantId}";
-        var value = await _database.StringGetAsync(key, cancellationToken: cancellationToken);
+        var value = await _database.StringGetAsync(key);
 
         if (value.IsNullOrEmpty)
             return null;
@@ -76,7 +76,7 @@ public sealed class RedisWalletCacheService : IWalletCacheService
     public async Task InvalidateBalanceCacheAsync(string tenantId, CancellationToken cancellationToken)
     {
         var key = $"{_prefix}wallet:balance:{tenantId}";
-        await _database.KeyDeleteAsync(key, cancellationToken: cancellationToken);
+        await _database.KeyDeleteAsync(key);
     }
 }
 
@@ -93,6 +93,5 @@ public sealed class BalanceCache
     public string TenantId { get; set; } = string.Empty;
     public decimal Balance { get; set; }
     public DateTime CachedAt { get; set; }
-}
 }
 

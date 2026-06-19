@@ -9,6 +9,7 @@ Bu adim sonunda:
 - Her servis/worker/simulator icin Dockerfile vardir.
 - Kok dizinde docker-compose.yml ile tum sistem calisir.
 - PostgreSQL, Redis ve RabbitMQ altyapisi compose icindedir.
+- OpenTelemetry Collector compose icinde OTLP trace/metrics endpointleri ile calisir.
 - Worker tarafinda Brighter & Darker stack ve RabbitMQ transport konfigurasyonu ayri options sinifi ile okunur.
 
 ## Eklenen Dosyalar
@@ -37,15 +38,21 @@ Bu adim sonunda:
 
 ## Compose Topolojisi
 
-- sqlserver (mssql 2022)
+- postgres
 - redis
-- rabbitmq (management UI dahil)
+- rabbitmq
 - identity
 - wallet
 - telemetry
 - event-processor
 - gateway
 - simulator (opsiyonel, profile: simulation)
+- otel-collector
+
+## Event Bus Durumu
+
+Bu adimda EventBus options modeli ve Docker ortamindaki RabbitMQ ayarlari hazirdir. `workers/event-processor/Worker.cs` hâlâ `InMemoryEventQueue` ve `InMemoryProcessedEventStore` kullanir. RabbitMQ transport hardening'i sonraki production adimlarindadir.
+
 
 ## Event Bus Best Practices (Bu Adimda Uygulanan + Yol Haritasi)
 
@@ -87,6 +94,12 @@ Durum kontrol:
 docker compose ps
 ```
 
+Compose syntax kontrol:
+
+```powershell
+docker compose config --quiet
+```
+
 Gateway health:
 
 ```powershell
@@ -105,9 +118,9 @@ Kapatma:
 docker compose down
 ```
 
-## Ogrenme Notu
+## Ogrenim Notu
 
-Docker ortaminda appsettings.Docker.json aktif olur cunku compose icinde ASPNETCORE_ENVIRONMENT=Docker (worker icin DOTNET_ENVIRONMENT=Docker) set edilmistir. Bu sayede Brighter & Darker stack, RabbitMQ transport ile calisir.
+Docker ortaminda appsettings.Docker.json aktif olur cunku compose icinde ASPNETCORE_ENVIRONMENT=Docker (worker icin DOTNET_ENVIRONMENT=Docker) set edilmistir. EventBus options konfigurasyonu mevcuttur ama MVP worker hâlâ `InMemoryEventQueue` uzerinden calisir. RabbitMQ producer/consumer transport hardening'i sonraki production adimlarindadir.
 
 ## Tamamlanma Kontrol Listesi
 

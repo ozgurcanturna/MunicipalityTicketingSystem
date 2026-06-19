@@ -1,5 +1,7 @@
 # Step 00: Planlama ve Gereksinimler
 
+> **Not**: Bu doküman hedef mimariyi tanımlar. Mevcut MVP ile birebir aynı değildir. Dokümantasyonun “Tamamlandı” durumu, hedef mimarinin tanımlanması için kullanilmiştir; mevcut kod MVP sürümüdür ve production-hardening adımları tamamlanmadan implementasyon beklentileri doğrulanmalıdır.
+
 ## 📋 Senaryo Özeti
 
 15 kişilik bir yazılım geliştirme ekibinin proje liderisiniz. Belediyelerde kullanılmak üzere bir otobüs biletleme sistemi geliştireceksiniz.

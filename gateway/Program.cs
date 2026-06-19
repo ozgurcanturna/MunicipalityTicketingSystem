@@ -1,44 +1,15 @@
 using System;
-using System.Diagnostics;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-
-
-
-
-using OpenTelemetry;
-using OpenTelemetry.Trace;
-using OpenTelemetry.Resources;
-using OpenTelemetry.Exporter;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add OpenTelemetry for distributed tracing
-if (bool.Parse(builder.Configuration["OpenTelemetry:Enabled"] ?? "false"))
-{
-    builder.Services.AddOpenTelemetry()
-            .WithTracing(tracing =>
-            {
-            tracing
-                .SetResourceBuilder(ResourceBuilder.CreateDefault()
-                    .AddService(
-                        serviceName: Environment.GetEnvironmentVariable("ASPNETCORE_SERVICE_NAME") ?? "api-gateway",
-                        serviceVersion: builder.Configuration["App:Version"] ?? "1.0.0"))
-                .AddAspNetCoreInstrumentation()
-                .AddHttpClientInstrumentation()
-                .AddSource("ApiGateway.Yarp")
-                .AddOtlpExporter(options =>
-                {
-                    options.Endpoint = new Uri(builder.Configuration["OpenTelemetry:Traces:Endpoint"] ?? "http://otel-collector:4317");
-                    options.Protocol = OtlpExportProtocol.Grpc;
-                });
-        });
-}
+// Add ServiceDefaults (Aspire integration)
+builder.AddServiceDefaults();
 
 builder.Services.AddOpenApi();
 builder.Services.AddReverseProxy()
@@ -171,5 +142,8 @@ app.MapGet("/", () => "API Gateway (YARP) is running");
 app.MapGet("/health", () => Results.Ok(new { status = "Healthy" }));
 
 app.MapReverseProxy();
+
+// Map health check endpoints (via ServiceDefaults)
+app.MapDefaultEndpoints();
 
 app.Run();

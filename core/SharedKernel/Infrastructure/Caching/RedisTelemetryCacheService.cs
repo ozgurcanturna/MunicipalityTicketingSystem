@@ -34,7 +34,7 @@ public sealed class RedisTelemetryCacheService : ITelemetryCacheService
     public async Task<JourneyCache?> GetJourneyCacheAsync(Guid journeyId, string tenantId, CancellationToken cancellationToken)
     {
         var key = $"{_prefix}journey:{tenantId}:{journeyId}";
-        var value = await _database.StringGetAsync(key, cancellationToken: cancellationToken);
+        var value = await _database.StringGetAsync(key);
 
         if (value.IsNullOrEmpty)
             return null;
@@ -45,7 +45,7 @@ public sealed class RedisTelemetryCacheService : ITelemetryCacheService
     public async Task InvalidateJourneyCacheAsync(Guid journeyId, string tenantId, CancellationToken cancellationToken)
     {
         var key = $"{_prefix}journey:{tenantId}:{journeyId}";
-        await _database.KeyDeleteAsync(key, cancellationToken: cancellationToken);
+        await _database.KeyDeleteAsync(key);
     }
 
     public async Task<bool> SetVehicleStatusCacheAsync(string vehicleId, string tenantId, string status, CancellationToken cancellationToken)
@@ -66,7 +66,7 @@ public sealed class RedisTelemetryCacheService : ITelemetryCacheService
     public async Task<string?> GetVehicleStatusCacheAsync(string vehicleId, string tenantId, CancellationToken cancellationToken)
     {
         var key = $"{_prefix}vehicle:{tenantId}:{vehicleId}";
-        var value = await _database.StringGetAsync(key, cancellationToken: cancellationToken);
+        var value = await _database.StringGetAsync(key);
 
         if (value.IsNullOrEmpty)
             return null;
@@ -78,7 +78,7 @@ public sealed class RedisTelemetryCacheService : ITelemetryCacheService
     public async Task InvalidateVehicleStatusCacheAsync(string vehicleId, string tenantId, CancellationToken cancellationToken)
     {
         var key = $"{_prefix}vehicle:{tenantId}:{vehicleId}";
-        await _database.KeyDeleteAsync(key, cancellationToken: cancellationToken);
+        await _database.KeyDeleteAsync(key);
     }
 }
 
@@ -97,5 +97,4 @@ public sealed class VehicleCache
     public Guid TenantId { get; set; }
     public string Status { get; set; } = string.Empty;
     public DateTime LastUpdated { get; set; }
-}
 }
