@@ -63,17 +63,16 @@ if (bool.Parse(builder.Configuration["Redis:Enabled"] ?? "false"))
     });
     
     builder.Services.AddScoped<IIdentityCacheService, RedisIdentityCacheService>();
-builder.Services.AddScoped<ITenantProvider, HttpHeaderTenantProvider>();
 }
 
-builder.Services.AddAuthorization(options =>
-{
-	options.AddPolicy("TenantAdmin", policy => policy.RequireRole(IdentityRoles.Admin));
-	options.AddPolicy("AuthenticatedUser", policy => policy.RequireAuthenticatedUser());
-});
-
 builder.Services.AddScoped<ITenantProvider, HttpHeaderTenantProvider>();
-builder.Services.AddSharedInfrastructure<IdentityDbContext>(builder.Configuration);
+builder.Services.AddAuthorization(options =>
+	{
+		options.AddPolicy("TenantAdmin", policy => policy.RequireRole(IdentityRoles.Admin));
+		options.AddPolicy("AuthenticatedUser", policy => policy.RequireAuthenticatedUser());
+	});
+
+	builder.Services.AddSharedInfrastructure<IdentityDbContext>(builder.Configuration);
 builder.Services.AddScoped<ITenantRepository, TenantRepository>();
 builder.Services.AddSingleton<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddSingleton<IJwtTokenService, JwtTokenService>();
@@ -104,6 +103,7 @@ app.Use(async (context, next) =>
 		context.Request.Headers["X-Correlation-Id"] = correlationId;
 	}
 	context.Items["CorrelationId"] = correlationId;
+	context.Response.Headers["X-Correlation-Id"] = correlationId;
 	await next();
 });
 

@@ -217,12 +217,54 @@ services:
       - "4317:4317"
       - "4318:4318"
       - "8889:8889"
+      - "9090:9090"
       - "13133:13133"
       - "55679:55679"
     depends_on:
-      - postgres
+      - jaeger
     networks:
       - municipality-net
+
+  jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: municipality-jaeger
+    ports:
+      - "16686:16686"
+      - "14268:14268"
+      - "14250:14250"
+    networks:
+      - municipality-net
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: municipality-prometheus
+    ports:
+      - "9091:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - municipality-net
+
+  grafana:
+    image: grafana/grafana-enterprise:latest
+    container_name: municipality-grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
+    networks:
+      - municipality-net
+
+volumes:
+  grafana-storage:
 
 networks:
   municipality-net:

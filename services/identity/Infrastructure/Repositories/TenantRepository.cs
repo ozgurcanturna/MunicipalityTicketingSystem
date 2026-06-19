@@ -8,6 +8,14 @@ namespace Tenant.Identity.Api.Infrastructure.Repositories;
 
 public sealed class TenantRepository : Repository<MunicipalityTenant>, ITenantRepository
 {
+    private static readonly Dictionary<string, Guid> SlugToGuid = new()
+    {
+        ["bursa"] = Guid.Parse("7f4c8c0f-1d7b-4d52-8a4d-000000000001"),
+        ["eskisehir"] = Guid.Parse("7f4c8c0f-1d7b-4d52-8a4d-000000000002"),
+        ["van"] = Guid.Parse("7f4c8c0f-1d7b-4d52-8a4d-000000000003"),
+        ["mersin"] = Guid.Parse("7f4c8c0f-1d7b-4d52-8a4d-000000000004"),
+    };
+
     public TenantRepository(IdentityDbContext dbContext)
         : base(dbContext)
     {
@@ -39,5 +47,11 @@ public sealed class TenantRepository : Repository<MunicipalityTenant>, ITenantRe
                 tenant => tenant.Id == tenantId
                     && tenant.Users.Any(user => user.Email == email),
                 cancellationToken);
+    }
+
+    public Task<MunicipalityTenant?> GetByUserEmailAsync(string tenantSlug, string email, CancellationToken cancellationToken = default)
+    {
+        var tenantId = SlugToGuid.GetValueOrDefault(tenantSlug.ToLowerInvariant());
+        return GetByUserEmailAsync(tenantId, email, cancellationToken);
     }
 }

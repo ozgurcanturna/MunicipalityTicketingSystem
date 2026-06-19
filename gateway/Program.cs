@@ -96,7 +96,8 @@ app.Use(async (context, next) =>
 	}
 
 	if (!context.Request.Headers.ContainsKey("X-Tenant-Id")
-		&& !context.Request.Path.StartsWithSegments("/api/identity/auth/bootstrap"))
+		&& !context.Request.Path.StartsWithSegments("/api/identity/auth/bootstrap")
+		&& !context.Request.Path.StartsWithSegments("/api/identity/auth/login"))
 	{
 		context.Response.StatusCode = StatusCodes.Status400BadRequest;
 		await context.Response.WriteAsJsonAsync(new

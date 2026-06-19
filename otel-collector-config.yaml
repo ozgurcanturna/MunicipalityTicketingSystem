@@ -5,6 +5,8 @@ receivers:
         endpoint: 0.0.0.0:4317
       http:
         endpoint: 0.0.0.0:4318
+      prometheus:
+        endpoint: 0.0.0.0:9090
 
 processors:
   batch:
@@ -22,18 +24,20 @@ processors:
 exporters:
   logging:
     verbosity: detailed
-  otlp:
+  otlp/jaeger:
     endpoint: jaeger:4317
     tls:
       insecure: true
+  prometheus:
+    endpoint: 0.0.0.0:9090
 
 service:
   pipelines:
     traces:
       receivers: [otlp]
       processors: [batch, resource]
-      exporters: [logging, otlp]
+      exporters: [logging, otlp/jaeger]
     metrics:
-      receivers: [otlp]
+      receivers: [otlp, prometheus]
       processors: [batch]
-      exporters: [logging]
+      exporters: [prometheus, logging]

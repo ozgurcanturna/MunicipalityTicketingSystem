@@ -14,6 +14,7 @@ using Ticketing.Wallet.Api.Domain.Entities;
 using Ticketing.Wallet.Api.Infrastructure.MultiTenancy;
 using Ticketing.Wallet.Api.Infrastructure.Persistence;
 using Ticketing.Wallet.Api.Infrastructure.Repositories;
+using Ticketing.Wallet.Api.Infrastructure.Seeding;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -67,8 +68,15 @@ if (bool.Parse(builder.Configuration["Redis:Enabled"] ?? "false"))
 builder.Services.AddScoped<ITenantProvider, HttpHeaderTenantProvider>();
 builder.Services.AddSharedInfrastructure<WalletDbContext>(builder.Configuration);
 builder.Services.AddScoped<IWalletRepository, WalletRepository>();
+builder.Services.AddSingleton<WalletDatabaseSeeder>();
 
 var app = builder.Build();
+
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var seeder = scope.ServiceProvider.GetRequiredService<WalletDatabaseSeeder>();
+    await seeder.SeedAsync();
+}
 
 if (app.Environment.IsDevelopment())
 {
@@ -87,48 +95,49 @@ app.Use(async (context, next) =>
 		context.Request.Headers["X-Correlation-Id"] = correlationId;
 	}
 	context.Items["CorrelationId"] = correlationId;
+	context.Response.Headers["X-Correlation-Id"] = correlationId;
 	await next();
 });
 
 app.Use(async (context, next) =>
-{
-	if (context.Request.Path == "/" || context.Request.Path.StartsWithSegments("/openapi"))
 	{
+		if (context.Request.Path == "/" || context.Request.Path.StartsWithSegments("/openapi"))
+		{
+			await next();
+			return;
+		}
+
+		if (!context.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantIdValues)
+			|| string.IsNullOrWhiteSpace(tenantIdValues.FirstOrDefault()))
+		{
+			context.Response.StatusCode = StatusCodes.Status400BadRequest;
+			await context.Response.WriteAsJsonAsync(new
+			{
+				message = "X-Tenant-Id header zorunludur."
+			});
+			return;
+		}
+
+		if (context.User.Identity?.IsAuthenticated != true)
+		{
+			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+			return;
+		}
+
+		var tenantHeader = tenantIdValues.FirstOrDefault()?.Trim();
+		var tenantClaim = context.User.FindFirstValue("tenant_id");
+		if (!string.Equals(tenantHeader, tenantClaim, StringComparison.OrdinalIgnoreCase))
+		{
+			context.Response.StatusCode = StatusCodes.Status403Forbidden;
+			await context.Response.WriteAsJsonAsync(new
+			{
+				message = "Token tenant bilgisi ile X-Tenant-Id uyusmuyor."
+			});
+			return;
+		}
+
 		await next();
-		return;
-	}
-
-	if (!context.Request.Headers.TryGetValue("X-Tenant-Id", out var tenantIdValues)
-		|| string.IsNullOrWhiteSpace(tenantIdValues.FirstOrDefault()))
-	{
-		context.Response.StatusCode = StatusCodes.Status400BadRequest;
-		await context.Response.WriteAsJsonAsync(new
-		{
-			message = "X-Tenant-Id header zorunludur."
-		});
-		return;
-	}
-
-	if (!context.User.Identity?.IsAuthenticated ?? true)
-	{
-		context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-		return;
-	}
-
-	var tenantHeader = tenantIdValues.FirstOrDefault()?.Trim();
-	var tenantClaim = context.User.FindFirstValue("tenant_id");
-	if (!string.Equals(tenantHeader, tenantClaim, StringComparison.OrdinalIgnoreCase))
-	{
-		context.Response.StatusCode = StatusCodes.Status403Forbidden;
-		await context.Response.WriteAsJsonAsync(new
-		{
-			message = "Token tenant bilgisi ile X-Tenant-Id uyusmuyor."
-		});
-		return;
-	}
-
-	await next();
-});
+	});
 
 app.UseAuthorization();
 
